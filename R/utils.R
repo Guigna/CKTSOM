@@ -48,6 +48,17 @@ trainSOM <- function(numberColumn, numberRow, initialLearningRate, finalLearning
 
 
 ## el BMU para cada dato del data set
+
+#' calculateBMUForData genera una lista con el BMU para cada dato ingresado
+#'
+#' @param data A data frame
+#' @param neurons A data frame
+#' @param clusterVector A numeric vector
+#' @param numberOfChildrenperNode A integer number
+#' @param treeHeight A integer number
+#'
+#'
+#' @return numeric vector con el BMU de cada dato
 calculateBMUForData <- function(data,neurons,clusterVector,numberOfChildrenperNode,treeHeight) {
   dataBMU<- rep(0,length(data[,1]))
   ini<-(length(neurons[,1])-(numberOfChildrenperNode**treeHeight)+1)
@@ -62,19 +73,19 @@ calculateBMUForData <- function(data,neurons,clusterVector,numberOfChildrenperNo
   return(dataBMU)
 }
 
-"
-FindBMU_tree_C <- function(dataNeuron,dataStimulus,numberOfChildrenperNode,treeHeight){
-bmu <- FindBMU_tree( dataNeuron, dataStimulus, numberOfChildrenperNode,  treeHeight)
-return(bmu + 1)
-}
-"
-
-
-#point1 , point2::Data.Frame
+#' calculateDistance calcula la distancia entre 2 puntos
+#'
+#' @param point1 A data frame
+#' @param point2 A data frame
+#'
+#' @return float que contiene la distancia calculada
 calculateDistance <- function(point1, point2){
   return (calculateEuclideanDistance (point1[1,],point2[1,] ))
 }
 
+#' setSeed calcula define la semilla
+#'
+#' @param semilla A integer
 setSeed <- function(semilla=123){
   set_seed(semilla) ## c++
   set.seed(semilla) ## R

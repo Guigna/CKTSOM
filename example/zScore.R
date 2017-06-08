@@ -32,7 +32,7 @@ dataBMU<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode
 clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)
 
 ########
-########     Outlayers
+########     outliers
 ########
 outliers <- getOutlayers(neurons,data ,numberOfChildrenperNode,treeHeight)
 
