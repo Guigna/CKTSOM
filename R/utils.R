@@ -91,13 +91,28 @@ setSeed <- function(semilla=123){
   set.seed(semilla) ## R
 }
 
-
+#' calculateBMUandDistance obtiene el BMU y la distancia a este
+#'
+#' @param dataNeuron A data frame
+#' @param dataStimulus A data frame
+#' @param numberOfChildrenperNode A integer
+#' @param treeHeight A integer
+#'
+#' @return Matrix donde Matrix[1] son los BMU y Matrix[2] contiene las distancias
 calculateBMUandDistance <- function(dataNeuron,dataStimulus,numberOfChildrenperNode,treeHeight){
   result <- findBmuAndDistance(dataNeuron,dataStimulus,numberOfChildrenperNode,treeHeight)
-  result[1] <- result[1] + 1
+  result[1] <- result[1] + 1  ##c++ usa las listas empezando en 0, se aumenta en 1 para poder usarlas sin problema en R
   return(result)
 }
 
+#' calculateGroups agrupa los datos definido por los grupos que se pueden generar con un arbol determinado
+#'
+#' @param numberOfGroups A data frame
+#' @param numberOfChildrenperNode A integer
+#' @param treeHeight A integer
+
+#'
+#' @return NumericVector que contiene el grupo para cada neurona del arbol
 calculateGroups <- function(numberOfGroups,numberOfChildrenperNode,treeHeight){
   level <- 0
   levelGroup <- numberOfChildrenperNode**level
@@ -116,10 +131,18 @@ calculateGroups <- function(numberOfGroups,numberOfChildrenperNode,treeHeight){
     groups[i] <- id
     groups <- marcarHijos(i,numberOfChildrenperNode,treeHeight,size,groups )
   }
-
   return(groups)
 }
 
+#' marcarHijos registra el grupo del nodo
+#'
+#' @param node A data frame
+#' @param numberOfChildrenperNode A integer
+#' @param treeHeight A integer
+#' @param size A integer
+#' @param groups A integer
+#'
+#' @return NumericVector que contiene el grupo para cada neurona del arbol
 marcarHijos<- function(node,numberOfChildrenperNode,treeHeight,size,groups ){
   hijos <- buscaHijos(node,numberOfChildrenperNode)
   if(hijos[1]<size){
@@ -131,6 +154,12 @@ marcarHijos<- function(node,numberOfChildrenperNode,treeHeight,size,groups ){
   return(groups)
 }
 
+#' calculateNumberOfNeurons calcula el largo del arbol
+#'
+#' @param numberOfChildrenperNode A integer
+#' @param treeHeight A integer
+#'
+#' @return integer largo del arbol
 calculateNumberOfNeurons<- function( numberOfChildrenperNode, treeHeight){
   sum <- 0
   for (i in c(0:treeHeight)) {
@@ -139,7 +168,16 @@ calculateNumberOfNeurons<- function( numberOfChildrenperNode, treeHeight){
   return(sum)
 }
 
-getOutlayers <- function(neurons,data ,numberOfChildrenperNode,treeHeight){
+#' getOutliers calcula los outla
+#'
+#' @param neurons A data frame
+#' @param data A data frame
+#' @param numberOfChildrenperNode A integer
+#' @param treeHeight A integer
+#' @param howManyStandardDeviations A integer [1:3]
+#'
+#' @return
+getOutliers <- function(neurons,data ,numberOfChildrenperNode,treeHeight,howManyStandardDeviations = 1){
   clusterVector<- c(1:length(neurons[,1]))
   ## calculate the bmu and distance for each data
   result <-matrix(ncol = 2,nrow = length(data[,1]))
@@ -148,18 +186,16 @@ getOutlayers <- function(neurons,data ,numberOfChildrenperNode,treeHeight){
     result[i,]<-calculateBMUandDistance(neurons,stimulus, numberOfChildrenperNode, treeHeight)
   }
   ## calculate mu and sigma
-  ##media (mu)
-  media <- mean(result[,2])
-  #desviacion estandar (o desviación típica)  (sigma)
-  desviacionEstandar <- sd(result[,2])
+  mu <- mean(result[,2])
+  sigma <- sd(result[,2])
 
   #generate  Z-Score
-  #(d - (mu) )  / (sigma)
+  #|(d - (mu) )|  / (sigma)
   Zscore <- vector(length = length(result[,1]))
-  Zscore<- (result[,2] - media)/desviacionEstandar
-  ##get outlayers
-  #z-score < 2sigma
-  outlayers <- c(1:length(data[,1]))
-  outlayers <- outlayers[Zscore > 2*desviacionEstandar]
-  return(outlayers)
+  Zscore<- (abs(result[,2] - mu))/sigma
+  ##get outliers
+  #z-score < [12,3]
+  outliers <- c(1:length(data[,1]))
+  outliers <- outliers[Zscore > howManyStandardDeviations]
+  return(outliers)
 }
