@@ -34,8 +34,8 @@ clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)
 ########
 ########     outliers
 ########
-outliers <- getOutliers(neurons,data ,numberOfChildrenperNode,treeHeight,3)
-length(outliers)
+howManyStandardDeviations <- 1   # 1 (about 68%), 2 (about 95%) or 3 (about 99%)
+outliers <- getOutliers(neurons,data ,numberOfChildrenperNode,treeHeight,howManyStandardDeviations)
 
 #delete outlayer of data
 procesData <- data[-outliers,]
@@ -51,5 +51,4 @@ dataBMU<- calculateBMUForData(procesData,neurons,clusterVector,numberOfChildrenp
 
 ##visualization phase
 ##Display phase with grouping
-x11()
 clusterVisualization(procesData,neurons,numberOfChildrenperNode,clusterVector,dataBMU)
