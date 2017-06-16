@@ -22,7 +22,7 @@ For installing the library you must execute the follwing command in R
 
 ```R
 library(devtools)
-install_github("Litier/CKTSOM")
+install_github("Guigna/CKTSOM")
 ```
 
 #### Example of execution 
