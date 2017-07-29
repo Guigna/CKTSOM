@@ -26,7 +26,6 @@ tf-ti #print execution time
 ##visualization phase
 ##Display phase without grouping
 clusterVisualization(data,neurons,numberOfChildrenperNode) #plot the scatter plot
-
 ###########
 #####################    visualization 2
 ###########

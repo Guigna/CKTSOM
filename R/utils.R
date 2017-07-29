@@ -179,8 +179,8 @@ calculateNumberOfNeurons<- function( numberOfChildrenperNode, treeHeight){
 #' @return
 getOutliers <- function(neurons,data ,numberOfChildrenperNode,treeHeight,howManyStandardDeviations = 1){
   clusterVector<- c(1:length(neurons[,1]))
-  ## calculate the bmu and distance for each data
-  result <-matrix(ncol = 2,nrow = length(data[,1]))
+  ## calculate the bmu and euclidian distance for each data
+  result <-matrix(ncol = 2,nrow = length(data[,1]))  #create matrix to start BMU and euclidean distance
   for (i in 1:length(data[,1])) {
     stimulus <- data[i,]
     result[i,]<-calculateBMUandDistance(neurons,stimulus, numberOfChildrenperNode, treeHeight)
@@ -191,11 +191,71 @@ getOutliers <- function(neurons,data ,numberOfChildrenperNode,treeHeight,howMany
 
   #generate  Z-Score
   #|(d - (mu) )|  / (sigma)
-  Zscore <- vector(length = length(result[,1]))
+  Zscore <- vector(length = length(result[,1]))  #create vector withc lenght equals to the number of stimuli
   Zscore<- (abs(result[,2] - mu))/sigma
   ##get outliers
   #z-score < [12,3]
   outliers <- c(1:length(data[,1]))
   outliers <- outliers[Zscore > howManyStandardDeviations]
   return(outliers)
+}
+
+calculateBmuDistance <- function(neurons,data ,numberOfChildrenperNode,treeHeight){
+  clusterVector<- c(1:length(neurons[,1]))
+  ## calculate the bmu and euclidian distance for each data
+  result <-matrix(ncol = 2,nrow = length(data[,1]))  #create matrix to start BMU and euclidean distance
+  for (i in 1:length(data[,1])) {
+    stimulus <- data[i,]
+    result[i,]<-calculateBMUandDistance(neurons,stimulus, numberOfChildrenperNode, treeHeight)
+  }
+
+  return(result)
+}
+
+getOutliers2 <- function(result,mu,sigma,howManyStandardDeviations = 1){
+  ## calculate mu and sigma
+
+
+  #generate  Z-Score
+  #|(d - (mu) )|  / (sigma)
+  Zscore <- vector(length = length(result[,1]))  #create vector withc lenght equals to the number of stimuli
+  Zscore<- (abs(result[,2] - mu))/sigma
+  ##get outliers
+  #z-score < [12,3]
+  outliers <- c(1:length(result[,1]))
+  outliers <- outliers[Zscore > howManyStandardDeviations]
+  return(outliers)
+}
+
+calculateMatrixOfConfusion <- function(neurons,data,numberOfChildrenperNode,treeHeight,mu,sigma,dataTraining,vectorStandartDEsviation){
+  totalCalculado<-data.frame()
+  result <- calculateBmuDistance(neurons,data ,numberOfChildrenperNode,treeHeight)
+  for (howManyStandardDeviations in vectorStandartDEsviation) {
+
+
+    outliers<-getOutliers2(result,mu,sigma,howManyStandardDeviations)
+    procesData <- data[-outliers,]
+    largoDAta <- length(data[,1])
+    nn <- length(outliers)
+
+    todo <- rbind(procesData,dataTraining)
+    duplicado<-duplicated(todo)
+    duplicado[duplicado == TRUE] <- 1
+    vp <-sum(duplicado)
+    fn<-length(procesData[,1])-vp
+
+
+    ##los negativos o otliers
+    procesDataNegative <- data[outliers,]
+    todoNegativ<-  rbind(procesDataNegative,dataTraining)
+    duplicado<-duplicated(todoNegativ)
+    duplicado[duplicado == TRUE] <- 1
+    fp<-sum(duplicado)
+    vn<-length(procesDataNegative[,1])-fp
+
+    calculo<- data.frame(vp,fn,fp,vn,howManyStandardDeviations)
+    totalCalculado<- rbind(totalCalculado,calculo)
+
+  }
+  return(totalCalculado)
 }
