@@ -185,7 +185,7 @@ clusterVisualization <- function(datos,neuronas,numberOfChildrenperNode,vectorCl
       facet_grid(xvar ~ yvar, scales = "free") +
       geom_point(colour = "red",size = 1) +
       geom_point(data = mega_neuronas,size = 1.5,shape = 19)
-    color <- 0
+    color <- 1
     sumaParcial<-0
     ##marca las lineas, agregandole el color por nivel
     for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
@@ -211,7 +211,7 @@ clusterVisualization <- function(datos,neuronas,numberOfChildrenperNode,vectorCl
       facet_grid(xvar ~ yvar, scales = "free") +
       geom_point(colour = mega_data$Categoria,size = 1,alpha=0.55)
 
-    color <- 0
+    color <- 1
     sumaParcial<-0
     ##marca las lineas, agregandole el color por nivel
     for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
@@ -226,4 +226,28 @@ clusterVisualization <- function(datos,neuronas,numberOfChildrenperNode,vectorCl
     p <- p + geom_point(data = mega_neuronas,size = 1.6, stroke = 1,shape = 21,colour = "black", fill =mega_neuronas$Categoria,alpha=1)
     p
   }
+}
+
+
+clusterVisualizationOnePlot <- function(datos,neuronas,numberOfChildrenperNode,x=1,y=2 ,colorEdge = FALSE){
+  colum<- c(x,y)
+  datos<- datos[,colum]
+  neuronas<- neuronas[,colum]
+
+  name<- names(datos)
+  # mi pairs plot
+  p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
+    geom_point(colour = "red",size = 1) +
+    geom_point(data = neuronas,size = 1.5,shape = 19)
+  color <- 0
+  sumaParcial<-0
+  ##marca las lineas, agregandole el color por nivel
+  for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
+    if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
+      sumaParcial<- sumaParcial +numberOfChildrenperNode^color
+      color <- color +1
+    }
+    p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),],colour = color+1)
+  }
+  p
 }

@@ -212,9 +212,7 @@ calculateBmuDistance <- function(neurons,data ,numberOfChildrenperNode,treeHeigh
   return(result)
 }
 
-getOutliers2 <- function(result,mu,sigma,howManyStandardDeviations = 1){
-  ## calculate mu and sigma
-
+getOutliersMuSigma <- function(result,mu,sigma,howManyStandardDeviations = 1){
 
   #generate  Z-Score
   #|(d - (mu) )|  / (sigma)
@@ -233,7 +231,7 @@ calculateMatrixOfConfusion <- function(neurons,data,numberOfChildrenperNode,tree
   for (howManyStandardDeviations in vectorStandartDEsviation) {
 
 
-    outliers<-getOutliers2(result,mu,sigma,howManyStandardDeviations)
+    outliers<-getOutliersMuSigma(result,mu,sigma,howManyStandardDeviations)
     procesData <- data[-outliers,]
     largoDAta <- length(data[,1])
     nn <- length(outliers)
@@ -243,7 +241,6 @@ calculateMatrixOfConfusion <- function(neurons,data,numberOfChildrenperNode,tree
     duplicado[duplicado == TRUE] <- 1
     vp <-sum(duplicado)
     fn<-length(procesData[,1])-vp
-
 
     ##los negativos o otliers
     procesDataNegative <- data[outliers,]
@@ -258,4 +255,99 @@ calculateMatrixOfConfusion <- function(neurons,data,numberOfChildrenperNode,tree
 
   }
   return(totalCalculado)
+}
+
+getDefaultTraingSeting<-function(numberOfChildrenperNode = 3,treeHeight =3,
+                                 initialLearningRate=1,finalLearningRate=0,initialRadius=7,
+                                 finalRadius=1,numberOfIterations=600000){
+  trainSeting<- rep(0,7)
+  trainSeting[1] <- numberOfChildrenperNode
+  trainSeting[2] <- treeHeight
+  trainSeting[3] <- initialLearningRate
+  trainSeting[4] <- finalLearningRate
+  trainSeting[5] <- initialRadius
+  trainSeting[6] <- finalRadius
+  trainSeting[7] <- numberOfIterations
+
+  return(trainSeting)
+}
+
+auc<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc = 5){
+  aucFinal <- rep(0,howManyAuc)
+  numberOfChildrenperNode <- trainSeting[1]
+  treeHeight <- trainSeting[2]
+  initialLearningRate <- trainSeting[3]
+  finalLearningRate <- trainSeting[4]
+  initialRadius <- trainSeting[5]
+  finalRadius <- trainSeting[6]
+  numberOfIterations <- trainSeting[7]
+
+  columns<- c(1:(length(data)+1))
+  i <- 1
+  while (i<=howManyAuc) {
+
+    ##train
+    dataTraining<- data.frame(data,labels)
+
+
+    estratos <- strata( dataTraining, stratanames = c("labels"), size = strataConfig, method = "srswor" )
+    dataTraining <- getdata( dataTraining, estratos )
+    trainingFolk <- dataTraining[,columns]
+    dataTraining <- dataTraining[dataTraining$labels ==1,]
+    dataTraining <- dataTraining[,columns]
+    dataTraining <- dataTraining[,-length(dataTraining)]
+    #######train listo               training
+
+    # Training with dataTraining
+    neurons <- train(numberOfChildrenperNode,treeHeight,initialLearningRate,finalLearningRate,initialRadius,finalRadius,numberOfIterations, dataTraining)
+    # Calculus of mu and sigma
+    result <- calculateBmuDistance(neurons,dataTraining ,numberOfChildrenperNode,treeHeight)
+    mu <- mean(result[,2])
+    sigma <- sd(result[,2])
+
+    #########data test
+
+    originalDataTestLabels<- data.frame(data,labels)
+    dataTest <- anti_join(originalDataTestLabels, trainingFolk)
+    resultadoEsoperado <- dataTest$labels
+    dataTest <- dataTest[,-length(dataTest)]
+    result <- calculateBmuDistance(neurons,dataTest ,numberOfChildrenperNode,treeHeight)
+    outliers<-getOutliersMuSigma(result,mu,sigma,howManyStandardDeviations = standardDeviations)
+
+
+
+    resultadoObtenido <- rep(1,length(dataTest[,1]))
+    resultadoObtenido[outliers] <- 0
+
+    testLabels = resultadoEsoperado
+    predictedScores = resultadoObtenido
+    if (sum(predictedScores) == 0 | sum(predictedScores) == length(predictedScores)) {
+      i <- i-1
+    } else {
+      pred <- prediction(testLabels, predictedScores);
+      pred <- performance(pred,"auc");
+      auc  <- pred@y.values[[1]][1]
+      aucFinal[i] <-auc
+    }
+    i <- i+1
+  }
+  return(aucFinal)
+}
+
+calculateStrata<- function(label){
+  lengthLabel <- length(label)
+  n <- sum(label)
+  first <- label[1]
+
+  percent <- round(l*0.9)
+
+  proportion <- n/lengthLabel
+
+  strata1 <- round(proportion* percent)  #1
+  strata2 <- percent - strata1    #0
+  if (first == 1) {
+    return(c(strata1,strata2))
+  } else{
+    return(c(strata2,strata1))
+  }
 }
