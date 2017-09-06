@@ -205,81 +205,48 @@ dataBMU<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode
 ##Display phase with grouping
 clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)
 ```
-##### Validation
+##### Validation AUC
 ```R
-library(CKTSOM)
+require(sampling)
 library(ggplot2)
-##Set seed to generate Tree
-#set_seed(543)
-##################### IRIS DATASET
-###parameters
-numberOfIterations <- 600000
-initialLearningRate <- 1
-finalLearningRate<- 0
-initialRadius <- 7
-finalRadius <- 1
-numberOfChildrenperNode <- 2
-treeHeight <- 3
+#install.packages("R.matlab")
+library(R.matlab)
+library(CKTSOM)
+library(dplyr)
+
+## get data of
+#  http://homepage.tudelft.nl/n9d04/occ/
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/501/oc_501.mat")
+
+## set parameters
+dataT <-data.frame(data$x$data)
+labels <- data$x$nlab
+labels <- labels -1
+strata <- calculateStrata(labels)
+trainSeting <- getDefaultTraingSeting()
+howManyAuc <- 5
+
+## calculate AUC
+vectorStandartDesviation <- seq(0.1, 3, 0.1)
+out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+n<- 1
+for (standardDeviations in vectorStandartDesviation) {
+  aucCalculate <-auc(dataT,labels,strata,standardDeviations,trainSeting,howManyAuc)
+  out[n,] <- aucCalculate
+  n<- n+1
+}
+
+## Mean AUC
+meanAuc <- c(1:length(out[,1]))
+for (i in c(1:length(out[,1]))) {
+  meanAuc[i]<- mean(out[i,])
+}
+
+##visualization
+grafic<- data.frame(vectorStandartDesviation,  meanAuc)
+plot <-ggplot(grafic, aes_string(x = "vectorStandartDesviation", y = "meanAuc"))+ geom_line(size = 1.6,alpha= 0.5)
 
 
-data(iris)
-data<-iris[-5] ## load a dataset
-##Execution algorithm
-result <- validate(data = data)
-#using parameters for training
-#result <- validate(data = data,numberOfIterations = numberOfIterations,initialLearningRate = initialLearningRate,finalLearningRate = finalLearningRate,initialRadius = initialRadius,finalRadius = finalRadius,numberOfChildrenperNode = numberOfChildrenperNode, treeHeight = treeHeight,trainingRatio = 0.66)
-
-####Split result
-##Training
-training <- data.frame(result[1:((length(result)-length(data))/2)])
-##Test
-test <- data.frame(result[(((length(result)-length(data))/2 )+ 1):(length(result)-length(data))])
-##Neurons tree
-neurons <- data.frame(result[(length(result)-length(data)+1):(length(result))])
-
-
-##################
-###  Training  ###
-##################
-drop <- c("trainingDataBMU","trainingDistancias")
-data = training[,!(names(training) %in% drop)]
-###   training plot
-clusterVisualization(data,neurons,numberOfChildrenperNode) #plot the scatter plot
-
-
-###   plot  (8 cluster)
-numberofGroups <- 8
-clusterVector <- calculateGroups(numberofGroups,numberOfChildrenperNode,treeHeight)
-dataBMU<- c(training$trainingDataBMU)
-
-clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)  #plot the scatter plot
-###  plot  (4 cluster)
-numberofGroups <- 4
-clusterVector <- calculateGroups(numberofGroups,numberOfChildrenperNode,treeHeight)
-dataBMU<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode,treeHeight)
-
-clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)  #plot the scatter plot
-
-
-##################
-###    Test    ###
-##################
-drop <- c("testDataBMU","testDistancias")
-data = test[,!(names(test) %in% drop)]
-### Test plot
-clusterVisualization(data,neurons,numberOfChildrenperNode) #plot the scatter plot
-###  plot  (8 cluster)
-numberofGroups <- 8
-clusterVector <- calculateGroups(numberofGroups,numberOfChildrenperNode,treeHeight)
-dataBMU<- c(test$testDataBMU)
-
-clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU) #plot the scatter plot
-###  plot  (4 cluster)
-numberofGroups <- 4
-clusterVector <- calculateGroups(numberofGroups,numberOfChildrenperNode,treeHeight)
-dataBMU<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode,treeHeight)
-
-clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)  #plot the scatter plot
+plot + xlab("Sigma") + ylab ("Auc") +
+  scale_y_continuous(breaks=seq(0, 1, 0.1),limit = c(0,1))
 ```
-
-
