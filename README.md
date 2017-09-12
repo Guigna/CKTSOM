@@ -205,7 +205,16 @@ dataBMU<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode
 ##Display phase with grouping
 clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)
 ```
-##### Validation AUC
+##### Valicdacion de one class usando AUC
+Para esta validación se utiliza el indicador área bajo la curva ROC (AUC, área under the curve). Esto permite determinar qué tan bueno fue la evaluación detectando datos atípicos utilizando datos de prueba.
+
+Los datos fueron obtenidos de la página del profesor David Tax, donde se encuentra una variedad de pruebas con distintos algoritmos proporcionando una tabla con la evaluación de cada uno de ellos, esto será utilizado para comparar y evaluar este algoritmo
+
+Página del profesor David Taz: http://prlab.tudelft.nl/users/david-tax
+
+Página de la biblioteca de datasets de one-class classification:  http://homepage.tudelft.nl/n9d04/occ/index.html
+
+
 ```R
 require(sampling)
 library(ggplot2)
