@@ -257,7 +257,7 @@ calculateMatrixOfConfusion <- function(neurons,data,numberOfChildrenperNode,tree
   return(totalCalculado)
 }
 
-getDefaultTraingSeting<-function(numberOfChildrenperNode = 3,treeHeight =3,
+getDefaultTraingSettings<-function(numberOfChildrenperNode = 3,treeHeight =3,
                                  initialLearningRate=1,finalLearningRate=0,initialRadius=7,
                                  finalRadius=1,numberOfIterations=600000){
   trainSeting<- rep(0,7)
@@ -272,7 +272,7 @@ getDefaultTraingSeting<-function(numberOfChildrenperNode = 3,treeHeight =3,
   return(trainSeting)
 }
 
-auc<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc = 5){
+validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc = 5){
   aucFinal <- rep(0,howManyAuc)
   numberOfChildrenperNode <- trainSeting[1]
   treeHeight <- trainSeting[2]
@@ -282,6 +282,7 @@ auc<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc
   finalRadius <- trainSeting[6]
   numberOfIterations <- trainSeting[7]
 
+  labels <- labels -1
   columns<- c(1:(length(data)+1))
   i <- 1
   while (i<=howManyAuc) {
@@ -334,12 +335,15 @@ auc<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc
   return(aucFinal)
 }
 
-calculateStrata<- function(label){
+
+
+calculateStrata<- function(label,percentage){
+  label <- label -1
   lengthLabel <- length(label)
   n <- sum(label)
   first <- label[1]
 
-  percent <- round(l*0.9)
+  percent <- round(lengthLabel*percentage)
 
   proportion <- n/lengthLabel
 
@@ -351,3 +355,5 @@ calculateStrata<- function(label){
     return(c(strata2,strata1))
   }
 }
+
+
