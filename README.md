@@ -222,6 +222,7 @@ library(ggplot2)
 library(R.matlab)
 library(CKTSOM)
 library(dplyr)
+require("ROCR");
 
 ## get data of
 #  http://homepage.tudelft.nl/n9d04/occ/
