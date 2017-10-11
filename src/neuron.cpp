@@ -18,47 +18,58 @@ int calculateNumberOfNeurons(int numberOfChildrenperNode, int treeHeight){
 }
 
 /**
-* Genera un vector de los hijos de una neurona.
-* TODO: explicar
+* Returns a list of indices indicating the location of the children for a given neuron.
+* 
 */
-Rcpp::NumericVector findChildren(int neuron,int  numberOfChildrenperNode){
+Rcpp::NumericVector findChildren(const int neuron,const int  numberOfChildrenperNode){
   Rcpp::NumericVector children(numberOfChildrenperNode);
-  neuron++;  //aumento el numero para tener la lista que empiesa 1
-  int n = 0;
   for (int i = 1; i <=numberOfChildrenperNode ;i++){
-    children[numberOfChildrenperNode -i] = numberOfChildrenperNode*neuron+n;  //disminuye el numero para una lista que empieza en 0
-    n = n -1;
+    //la expresion (-1+1) proviene de una relacion entre el indice i la ubicaicon del hijo respectivo
+    children[numberOfChildrenperNode -i] = numberOfChildrenperNode*(neuron+1)+(-i+1);  //disminuye el numero para una lista que empieza en 0
   }
   return children;
 }
 
-//obtiene el padre de una neurona
-//N - (N%k)
-int findFather(int neuron,int numberOfChildrenperNode){
-  neuron++;  //aumento el numero para tener la lista que empiesa 1
-  int father = (neuron + numberOfChildrenperNode - 2 )/numberOfChildrenperNode;
-  return father-1;  //disminulle el numero para una lista que empiesa en 0
+/**
+* Returns a indicex of the father of a given neuron. 
+* Warning: The C code uses indices starting from 0, but in R the indices IDs start from 1.
+*/
+int findFather(const int neuron,const int numberOfChildrenperNode){
+  int father = (neuron + numberOfChildrenperNode - 1 )/numberOfChildrenperNode; //N - (N%k)
+  return father-1;  // we must subtract unity because the root index starts with 0
 }
 
-//obtiene los hermanos de una neurona, retornando un vector (incluyendo la neurona )
+
+/**
+* Returns a vector of indices identifying all the siblings, including the neuron itself.
+**/
 Rcpp::NumericVector findBrothers(int neuron ,int numberOfChildrenperNode){
   int father = findFather(neuron,numberOfChildrenperNode);
   Rcpp::NumericVector brothers = findChildren(father,numberOfChildrenperNode);
   return brothers;
 }
 
-//mueve la neurona al estimulo
-Rcpp::NumericVector updateNeuron(Rcpp::NumericVector neuron, Rcpp::NumericVector stimulus,float learningRate){
+/**
+* The SOM's update rule.
+* neuron: a vector containing the weights of the neuron to be updated.
+* stimulus: a random selected instance obtained form the dataset.
+* learningRate: a factor specifying the ammount of the migration towards the stimulus.
+**/
+Rcpp::NumericVector updateNeuron(Rcpp::NumericVector neuron, const Rcpp::NumericVector stimulus,const float learningRate){
   for (int i =0 ; i <neuron.size(); i++){
     neuron[i] = neuron[i] - learningRate* (neuron[i] - stimulus[i]);
   }
   return neuron;
 }
 
-//actualiza el arbol
-NumericMatrix updateStructure(NumericMatrix neurons, NumericVector stimulus,
-                              float radius, float learningRate, int BMU, int numberOfChildrenperNode){
-  //mueve el BM
+/**
+* Adjust the whole tree using SOMs update rule.
+**/
+NumericMatrix updateStructure(NumericMatrix neurons, const NumericVector stimulus,
+                               float radius, float learningRate, int BMU, int numberOfChildrenperNode){
+  // update the whole row using black magic from rcpp  :)
+  // check the section "Using matrices " of the following URL
+  // https://cran.r-project.org/web/packages/Rcpp/vignettes/Rcpp-quickref.pdf
   neurons(BMU,_) =updateNeuron(neurons(BMU,_),stimulus,learningRate);
 
   //busca el padre del BMU
@@ -94,6 +105,21 @@ NumericMatrix updateStructure(NumericMatrix neurons, NumericVector stimulus,
 
 //calcula la distancia eucludiana entre 2 puntos
 float calculateEuclideanDistance2Point (NumericVector point1,NumericVector point2 ){
+  
+  //https://helloacm.com/how-to-compute-minkowski-euclidean-and-cityblock-distance-in-c/
+  // pegita: actualuzar funcion, usando codigo de distancia de minkowski.
+  //la  idea es saltarse las dimensiones de los x que tienen NA, pero considerando en la suma total
+  //aquellos valorees de x que estan bien definidos.
+  // sabemos que las neuronas no tienen NA
+  //por lo tanto esta es una operacion que debe realizase dimension por dimension y no de un "paragiazo" como en la linea
+  // "resta = point1 - point2;" que se especifica mas abajo. en es caso estamos invocan una sobrecarga del operador -
+  // que realmente esta realizando una resta de vectores. de hecho una alternativa seria ver ese codigo y
+  // crear una copia modificada que se encarge de los NA
+  //el codigo resultante se va a vert algo asi
+  // mask=is_na(point2)
+  // for i to d
+  //    if mask(i)==true  then ...
+  
   NumericVector resta(point1.size());
   point1[is_na(point1)] = 0;
   point2[is_na(point2)] = 0;
