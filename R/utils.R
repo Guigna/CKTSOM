@@ -273,7 +273,9 @@ getDefaultTraingSettings<-function(numberOfChildrenperNode = 3,treeHeight =3,
 }
 
 validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc = 5){
-  aucFinal <- rep(0,howManyAuc)
+  repMax <- 3*howManyAuc
+  repAct<-1
+  aucFinal <- rep(NA,howManyAuc)
   numberOfChildrenperNode <- trainSeting[1]
   treeHeight <- trainSeting[2]
   initialLearningRate <- trainSeting[3]
@@ -331,6 +333,10 @@ validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting
       aucFinal[i] <-auc
     }
     i <- i+1
+    repAct<- repAct+1
+    if (repAct > repMax){
+      i <- 999
+    }
   }
   return(aucFinal)
 }

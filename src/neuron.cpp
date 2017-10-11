@@ -19,7 +19,7 @@ int calculateNumberOfNeurons(int numberOfChildrenperNode, int treeHeight){
 
 /**
 * Returns a list of indices indicating the location of the children for a given neuron.
-* 
+*
 */
 Rcpp::NumericVector findChildren(const int neuron,const int  numberOfChildrenperNode){
   Rcpp::NumericVector children(numberOfChildrenperNode);
@@ -31,7 +31,7 @@ Rcpp::NumericVector findChildren(const int neuron,const int  numberOfChildrenper
 }
 
 /**
-* Returns a indicex of the father of a given neuron. 
+* Returns a indicex of the father of a given neuron.
 * Warning: The C code uses indices starting from 0, but in R the indices IDs start from 1.
 */
 int findFather(const int neuron,const int numberOfChildrenperNode){
@@ -105,7 +105,7 @@ NumericMatrix updateStructure(NumericMatrix neurons, const NumericVector stimulu
 
 //calcula la distancia eucludiana entre 2 puntos
 float calculateEuclideanDistance2Point (NumericVector point1,NumericVector point2 ){
-  
+
   //https://helloacm.com/how-to-compute-minkowski-euclidean-and-cityblock-distance-in-c/
   // pegita: actualuzar funcion, usando codigo de distancia de minkowski.
   //la  idea es saltarse las dimensiones de los x que tienen NA, pero considerando en la suma total
@@ -119,7 +119,7 @@ float calculateEuclideanDistance2Point (NumericVector point1,NumericVector point
   // mask=is_na(point2)
   // for i to d
   //    if mask(i)==true  then ...
-  
+
   NumericVector resta(point1.size());
   point1[is_na(point1)] = 0;
   point2[is_na(point2)] = 0;
@@ -189,7 +189,7 @@ NumericMatrix disorder(NumericMatrix data){
 
 // [[Rcpp::export]]
 Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float initialLearningRate ,float finalLearningRate,
-                       int initialRadius,int  finalRadius, int iterations
+                       int initialRadius,int  finalRadius, unsigned long iterations
                          , Rcpp::List lst,
                          Rcpp::CharacterVector Names = Rcpp::CharacterVector::create()) {
 
@@ -211,10 +211,10 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
 
   //genera los datos copiando del dataset
   int minD =0;
-  int maxD = neurons(_,0).size()-1;
+  int maxData = data(_,0).size()-1;
   int indexDato ;
   for (int i = 0; i < neuronsSize; i++) {
-    indexDato = minD + ((double) rand() / (RAND_MAX)) * (maxD - minD);
+    indexDato = minD + ((double) rand() / (RAND_MAX)) * (maxData - minD);
     neurons(i,_) = data(indexDato,_);
 
   }
@@ -237,7 +237,7 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
   ///////////////////////////////START TRAINING
   ///////////////////////////////
 
-  for(int i = 0 ; i <iterations ; i++){
+  for(unsigned long i = 0 ; i <iterations ; i++){
     //inicia nueva epoca
     if (index == dataLength){
       data = disorder(data);

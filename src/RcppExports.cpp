@@ -18,7 +18,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // train_Rcpp
-Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode, int treeHeight, float initialLearningRate, float finalLearningRate, int initialRadius, int finalRadius, int iterations, Rcpp::List lst, Rcpp::CharacterVector Names);
+Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode, int treeHeight, float initialLearningRate, float finalLearningRate, int initialRadius, int finalRadius, unsigned long iterations, Rcpp::List lst, Rcpp::CharacterVector Names);
 RcppExport SEXP CKTSOM_train_Rcpp(SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP, SEXP initialLearningRateSEXP, SEXP finalLearningRateSEXP, SEXP initialRadiusSEXP, SEXP finalRadiusSEXP, SEXP iterationsSEXP, SEXP lstSEXP, SEXP NamesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -29,7 +29,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< float >::type finalLearningRate(finalLearningRateSEXP);
     Rcpp::traits::input_parameter< int >::type initialRadius(initialRadiusSEXP);
     Rcpp::traits::input_parameter< int >::type finalRadius(finalRadiusSEXP);
-    Rcpp::traits::input_parameter< int >::type iterations(iterationsSEXP);
+    Rcpp::traits::input_parameter< unsigned long >::type iterations(iterationsSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type lst(lstSEXP);
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type Names(NamesSEXP);
     rcpp_result_gen = Rcpp::wrap(train_Rcpp(numberOfChildrenperNode, treeHeight, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names));
