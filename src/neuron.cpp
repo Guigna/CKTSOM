@@ -221,10 +221,10 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
   //neurons listas para mover
 
   float learningRate = initialLearningRate;
-  float learningRateStep = (initialLearningRate - finalLearningRate) / iterations;
+  long double learningRateStep = (initialLearningRate - finalLearningRate) / iterations;
 
   float radius = initialRadius;
-  float radiusStep = (initialRadius - finalRadius) / iterations;
+  long double radiusStep = (initialRadius - finalRadius) / iterations;
 
 
   //desordena los datos
@@ -514,4 +514,3 @@ Rcpp::DataFrame trainSOM_Rcpp(int numberColumn,int numberRow,float initialLearni
 
   return result;
 }
-
