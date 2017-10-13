@@ -6,13 +6,13 @@
 using namespace Rcpp;
 
 // calculateEuclideanDistance
-float calculateEuclideanDistance(DataFrame point1, DataFrame point2);
+float calculateEuclideanDistance(const DataFrame point1, const DataFrame point2);
 RcppExport SEXP CKTSOM_calculateEuclideanDistance(SEXP point1SEXP, SEXP point2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type point1(point1SEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type point2(point2SEXP);
+    Rcpp::traits::input_parameter< const DataFrame >::type point1(point1SEXP);
+    Rcpp::traits::input_parameter< const DataFrame >::type point2(point2SEXP);
     rcpp_result_gen = Rcpp::wrap(calculateEuclideanDistance(point1, point2));
     return rcpp_result_gen;
 END_RCPP

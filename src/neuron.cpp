@@ -2,8 +2,10 @@
 #include <string>
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>
+#include <math.h>
 
 using namespace Rcpp;
+
 
 
 /**
@@ -21,10 +23,10 @@ int calculateNumberOfNeurons(int numberOfChildrenperNode, int treeHeight){
 * Returns a list of indices indicating the location of the children for a given neuron.
 *
 */
-Rcpp::NumericVector findChildren(const int neuron,const int  numberOfChildrenperNode){
+Rcpp::NumericVector getChildrenIndices(const int neuron,const int  numberOfChildrenperNode){
   Rcpp::NumericVector children(numberOfChildrenperNode);
   for (int i = 1; i <=numberOfChildrenperNode ;i++){
-    //la expresion (-1+1) proviene de una relacion entre el indice i la ubicaicon del hijo respectivo
+    //la expresion (-i+1) proviene de una relacion entre el indice i la ubicaicon del hijo respectivo
     children[numberOfChildrenperNode -i] = numberOfChildrenperNode*(neuron+1)+(-i+1);  //disminuye el numero para una lista que empieza en 0
   }
   return children;
@@ -34,7 +36,7 @@ Rcpp::NumericVector findChildren(const int neuron,const int  numberOfChildrenper
 * Returns a indicex of the father of a given neuron.
 * Warning: The C code uses indices starting from 0, but in R the indices IDs start from 1.
 */
-int findFather(const int neuron,const int numberOfChildrenperNode){
+int getParentIndex(const int neuron,const int numberOfChildrenperNode){
   int father = (neuron + numberOfChildrenperNode - 1 )/numberOfChildrenperNode; //N - (N%k)
   return father-1;  // we must subtract unity because the root index starts with 0
 }
@@ -43,9 +45,9 @@ int findFather(const int neuron,const int numberOfChildrenperNode){
 /**
 * Returns a vector of indices identifying all the siblings, including the neuron itself.
 **/
-Rcpp::NumericVector findBrothers(int neuron ,int numberOfChildrenperNode){
-  int father = findFather(neuron,numberOfChildrenperNode);
-  Rcpp::NumericVector brothers = findChildren(father,numberOfChildrenperNode);
+Rcpp::NumericVector getSiblingsIndices(const int neuron ,const int numberOfChildrenperNode){
+  int father = getParentIndex(neuron,numberOfChildrenperNode);
+  Rcpp::NumericVector brothers = getChildrenIndices(father,numberOfChildrenperNode);
   return brothers;
 }
 
@@ -65,100 +67,82 @@ Rcpp::NumericVector updateNeuron(Rcpp::NumericVector neuron, const Rcpp::Numeric
 /**
 * Adjust the whole tree using SOMs update rule.
 **/
-NumericMatrix updateStructure(NumericMatrix neurons, const NumericVector stimulus,
-                               float radius, float learningRate, int BMU, int numberOfChildrenperNode){
-  // update the whole row using black magic from rcpp  :)
-  // check the section "Using matrices " of the following URL
-  // https://cran.r-project.org/web/packages/Rcpp/vignettes/Rcpp-quickref.pdf
-  neurons(BMU,_) =updateNeuron(neurons(BMU,_),stimulus,learningRate);
-
-  //busca el padre del BMU
-  int father = findFather(BMU,numberOfChildrenperNode);
-
-  //disminuye la tasa de aprendizaje, ya que en cada nivel que sube el entrenamiento
-  //se encuentra mas lejos del BMU y mas cerca de la raiz
-  learningRate =learningRate * 0.9;
-
-  //mueve el padre
-  if (father >= 0 && radius > 1){
-    neurons = updateStructure(neurons, stimulus, radius,  learningRate,  father,  numberOfChildrenperNode);
-
-
+NumericMatrix updateTree(NumericMatrix neurons, const NumericVector stimulus,
+                          float radius, const float learningRate,const int BMU, const int numberOfChildrenperNode){
+  int children;
+  int current = BMU;
+  float factor = learningRate;
+  //update neuron current
+  for (int i =0 ; i <neurons(current,_).size(); i++){
+    neurons(current,i) = neurons(current,i) - factor* (neurons(current,i) - stimulus[i]);
   }
 
-  //mueve hermano
-  if(BMU > 0 && radius > 1){
-    Rcpp::NumericVector brothers = findBrothers(BMU,numberOfChildrenperNode);
-    for (int i = 0; i < brothers.size();i++){
-      int brother = brothers[i];
-      //revisa para no mover el BMU
-      if (brother!= BMU){
-        //mueve los hermanos reduciendo la tasa de aprendizaje aun mas, para evitar que se junte con el BMU
-        neurons(brother,_) =updateNeuron(neurons(brother,_),stimulus,learningRate*0.2);
+  while(current > 0 && radius >= 1){
+
+    int currentFatherIndex = ((current + numberOfChildrenperNode - 1 )/numberOfChildrenperNode)-1;
+    //neuron update father of current
+    for (int i =0 ; i <neurons(currentFatherIndex,_).size(); i++){
+      neurons(currentFatherIndex,i) = neurons(currentFatherIndex,i) - factor* (neurons(currentFatherIndex,i) - stimulus[i]);
+    }
+    for (int i = 1; i <=numberOfChildrenperNode && radius>=1 ;i++){
+      //la expresion (-i+1) proviene de una relacion entre el indice i la ubicaicon del hijo respectivo
+      children = numberOfChildrenperNode*(currentFatherIndex+1)+(-i+1);  //disminuye el numero para una lista que empieza en 0
+
+      if (children != current){
+        //neuron update Siblings of current
+        for (int i =0 ; i <neurons(children,_).size(); i++){
+          neurons(children,i) = neurons(children,i) - (factor*0.2) * (neurons(children,i) - stimulus[i]);
+        }
+
       }
     }
+    radius = radius - 1;
+    factor = factor*0.9;
+    current = currentFatherIndex;
   }
   return neurons;
 }
 
-
-
-//calcula la distancia eucludiana entre 2 puntos
-float calculateEuclideanDistance2Point (NumericVector point1,NumericVector point2 ){
-
-  //https://helloacm.com/how-to-compute-minkowski-euclidean-and-cityblock-distance-in-c/
-  // pegita: actualuzar funcion, usando codigo de distancia de minkowski.
-  //la  idea es saltarse las dimensiones de los x que tienen NA, pero considerando en la suma total
-  //aquellos valorees de x que estan bien definidos.
-  // sabemos que las neuronas no tienen NA
-  //por lo tanto esta es una operacion que debe realizase dimension por dimension y no de un "paragiazo" como en la linea
-  // "resta = point1 - point2;" que se especifica mas abajo. en es caso estamos invocan una sobrecarga del operador -
-  // que realmente esta realizando una resta de vectores. de hecho una alternativa seria ver ese codigo y
-  // crear una copia modificada que se encarge de los NA
-  //el codigo resultante se va a vert algo asi
-  // mask=is_na(point2)
-  // for i to d
-  //    if mask(i)==true  then ...
-
-  NumericVector resta(point1.size());
-  point1[is_na(point1)] = 0;
-  point2[is_na(point2)] = 0;
-
-  resta = point1 - point2;
-  resta = resta*resta;
-  float disc = sum(resta);
-  float d = sqrt(disc);
-  return d;
+//calcula la distancia eucludiana al cuadrado entre 2 puntos   (neuron, stimulus)
+double calculateEuclideanDistance2PointExponential (const NumericVector point1,const NumericVector point2 ){
+  LogicalVector mask = is_na(point2);
+  double sum=0;
+  for (int i = 0; i < mask.size(); i++){
+    if (mask[i] != true){
+      sum = sum +  pow(( point1[i] - point2[i]),2);
+    }
+  }
+  return sum;
 }
 
 // [[Rcpp::export]]
-float calculateEuclideanDistance (DataFrame point1,DataFrame point2){
+float calculateEuclideanDistance (const DataFrame point1,const DataFrame point2){
   NumericMatrix point1Matrix = internal::convert_using_rfunction(point1, "as.matrix");
   NumericVector point1Vector = point1Matrix(0,_);
 
   NumericMatrix point2Matrix = internal::convert_using_rfunction(point2, "as.matrix");
   NumericVector point2Vector = point2Matrix(0,_);
-  return calculateEuclideanDistance2Point(point1Vector,point2Vector);
+  return calculateEuclideanDistance2PointExponential(point1Vector,point2Vector);
 }
 
 //calcula la distancia del estimulo a las neuronas
-NumericVector distance (NumericMatrix neurons,NumericVector stimulus){
+NumericVector distance (const NumericMatrix neurons,const NumericVector stimulus){
 
   NumericVector distances(neurons(_,1).size());
   for (int i = 0; i <distances.size();i++ ){
-    distances(i) = calculateEuclideanDistance2Point(neurons(i,_),stimulus);
+    distances(i) = calculateEuclideanDistance2PointExponential(neurons(i,_),stimulus);
   }
   return distances;
 }
 
 //Busca el BMU partiendo en la raiz, llegando a las hojas
-int FindBMU_tree(NumericVector stimulus,NumericMatrix neurons,int numberOfChildrenperNode, int treeHeight){
+int findBMU_tree(const NumericVector stimulus,const NumericMatrix neurons,const int numberOfChildrenperNode,const int treeHeight){
   int BMU = 0;
   int lastfather = (neurons(_,0).size()-1)-pow(numberOfChildrenperNode,treeHeight);
 
   while (BMU <= lastfather){
     //busca las neuronas del siguiente nivel
-    NumericVector children  = findChildren(BMU,numberOfChildrenperNode);
+    NumericVector children  = getChildrenIndices(BMU,numberOfChildrenperNode);
     //genera un vector con las neuronas del nivel
     NumericMatrix neuronsChildren(children.size(),stimulus.size());
     for(int i = 0; i < children.size(); i++){
@@ -245,10 +229,10 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
     }
 
     //busca el BMU
-    int bestNeuron = FindBMU_tree( data(index,_), neurons,numberOfChildrenperNode, treeHeight);
+    int bestNeuron = findBMU_tree( data(index,_), neurons,numberOfChildrenperNode, treeHeight);
     //actualiza la red neuronal
-    neurons = updateStructure( neurons,  data(index,_),round(radius),  learningRate, bestNeuron, numberOfChildrenperNode);
-
+    //neurons = updateStructure( neurons,  data(index,_),round(radius),  learningRate, bestNeuron, numberOfChildrenperNode);
+    neurons = updateTree( neurons,  data(index,_),round(radius),  learningRate, bestNeuron, numberOfChildrenperNode);
     radius -= radiusStep;
     learningRate -= learningRateStep;
     index+=1;
@@ -293,6 +277,8 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
   return result;
 }
 
+///////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 //metodos para topologia de grafo
 //busca el BMU entre todas las neuronas
@@ -325,39 +311,14 @@ NumericVector findBmuAndDistance(DataFrame dataNeuron,DataFrame dataStimulus,int
   NumericMatrix dataStimulusMatrix = internal::convert_using_rfunction(dataStimulus, "as.matrix");
   NumericVector stimulus = dataStimulusMatrix(0,_);
   //find BMU
-  result[0] = FindBMU_tree( stimulus,dataNeuronMatrix, numberOfChildrenperNode, treeHeight);
+  result[0] = findBMU_tree( stimulus,dataNeuronMatrix, numberOfChildrenperNode, treeHeight);
 
   //Distance to BMU
-  result[1] = calculateEuclideanDistance2Point (dataNeuronMatrix(result[0],_),stimulus);
+  result[1] = calculateEuclideanDistance2PointExponential(dataNeuronMatrix(result[0],_),stimulus);
   return result;
 }
 
 
-/*
- // [[Rcpp::export]]
- int FindBMU_tree(DataFrame dataNeuron,DataFrame dataStimulus,int numberOfChildrenperNode, int treeHeight){
- Rcpp::NumericMatrix neurons = internal::convert_using_rfunction(dataNeuron, "as.matrix");
- NumericMatrix stimulusMatrix = internal::convert_using_rfunction(dataStimulus, "as.matrix");
- NumericVector stimulus = stimulusMatrix(0,_);
-
- int bmu = FindBMU_tree( stimulus, neurons, numberOfChildrenperNode,  treeHeight);
- return bmu;
- }
-
-
-
- // [[Rcpp::export]]
- float calculateEuclideanDistance(DataFrame point1data,DataFrame point2data ){
- NumericMatrix point1Matrix = internal::convert_using_rfunction(point1data, "as.matrix");
- NumericVector point1 = point1Matrix(0,_);
-
- NumericMatrix point2Matrix = internal::convert_using_rfunction(point2data, "as.matrix");
- NumericVector point2 = point2Matrix(0,_);
-
- return calculateEuclideanDistance2Point ( point1, point2 );
- }
-*/
-///////////////////////////////////////////SOM
 
 
 //actualiza el matriz de SOM
@@ -514,3 +475,5 @@ Rcpp::DataFrame trainSOM_Rcpp(int numberColumn,int numberRow,float initialLearni
 
   return result;
 }
+
+
