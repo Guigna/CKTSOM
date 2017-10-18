@@ -147,24 +147,25 @@ NumericVector distance (const NumericMatrix neurons,const NumericVector stimulus
 int findBMU_tree(const NumericVector stimulus,const NumericMatrix neurons,const int numberOfChildrenperNode,const int treeHeight){
   int BMU = 0;
   int lastfather = (neurons(_,0).size()-1)-pow(numberOfChildrenperNode,treeHeight);
-
+  int olderChildrenIndice;
   while (BMU <= lastfather){
-    //busca las neuronas del siguiente nivel
-    NumericVector children  = getChildrenIndices(BMU,numberOfChildrenperNode);
+    //find first children
+    olderChildrenIndice = numberOfChildrenperNode*(BMU+1)-numberOfChildrenperNode+1;
     //genera un vector con las neuronas del nivel
-    NumericMatrix neuronsChildren(children.size(),stimulus.size());
-    for(int i = 0; i < children.size(); i++){
-      neuronsChildren(i,_) = neurons(children[i],_);
+    NumericMatrix neuronsChildren(numberOfChildrenperNode,stimulus.size());
+    for(int i = 0; i < numberOfChildrenperNode; i++){
+      neuronsChildren(i,_) = neurons(olderChildrenIndice+i,_);
     }
     //calcula la distancia de el estimulo a las neuronas del nivel
     NumericVector dist = distance(neuronsChildren,stimulus);
     NumericVector::iterator it = std::min_element(dist.begin(), dist.end());
-    int indexBestNeuron = it - dist.begin();
     //cambia el BMU al hijo mas cercano
-    BMU = children[indexBestNeuron];
+    BMU = olderChildrenIndice + it - dist.begin();
   }
   return BMU;
 }
+
+
 
 //desordena el set de datos
 NumericMatrix disorder(NumericMatrix data){
@@ -494,21 +495,3 @@ Rcpp::DataFrame trainSOM_Rcpp(int numberColumn,int numberRow,float initialLearni
 
 
 
-
-// [[Rcpp::export]]
-bool pruebaNA(DataFrame data){
-  NumericMatrix dataMatrix = internal::convert_using_rfunction(data, "as.matrix");
-  NumericVector oneData;
-  int maxData = dataMatrix(_,0).size();
-  LogicalVector mask;
-  for(int i = 0; i < maxData;i++){
-    oneData = dataMatrix(i,_);
-    mask = is_na(oneData);
-    Rcout << mask << std::endl;
-    if(sum(mask) != 0){
-      Rcout <<  "encontrado NA" << std::endl;
-    }
-  }
-
-  return mask;
-}

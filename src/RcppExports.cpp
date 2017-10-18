@@ -91,14 +91,3 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// pruebaNA
-bool pruebaNA(DataFrame data);
-RcppExport SEXP CKTSOM_pruebaNA(SEXP dataSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
-    rcpp_result_gen = Rcpp::wrap(pruebaNA(data));
-    return rcpp_result_gen;
-END_RCPP
-}

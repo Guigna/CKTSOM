@@ -25,7 +25,3 @@ trainSOM_Rcpp <- function(numberColumn, numberRow, initialLearningRate, finalLea
     .Call('CKTSOM_trainSOM_Rcpp', PACKAGE = 'CKTSOM', numberColumn, numberRow, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names)
 }
 
-pruebaNA <- function(data) {
-    .Call('CKTSOM_pruebaNA', PACKAGE = 'CKTSOM', data)
-}
-
