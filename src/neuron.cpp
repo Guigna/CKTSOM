@@ -57,7 +57,7 @@ Rcpp::NumericVector getSiblingsIndices(const int neuron ,const int numberOfChild
 * stimulus: a random selected instance obtained form the dataset.
 * learningRate: a factor specifying the ammount of the migration towards the stimulus.
 **/
-Rcpp::NumericVector updateNeuron(Rcpp::NumericVector neuron, const Rcpp::NumericVector stimulus,const float learningRate){
+Rcpp::NumericVector updateNeuron(Rcpp::NumericVector neuron, const Rcpp::NumericVector &stimulus,const float learningRate){
   for (int i =0 ; i <neuron.size(); i++){
     neuron[i] = neuron[i] - learningRate* (neuron[i] - stimulus[i]);
   }
@@ -69,20 +69,26 @@ Rcpp::NumericVector updateNeuron(Rcpp::NumericVector neuron, const Rcpp::Numeric
 **/
 NumericMatrix updateTree(NumericMatrix neurons, const NumericVector stimulus,
                           float radius, const float learningRate,const int BMU, const int numberOfChildrenperNode){
+  LogicalVector mask = is_na(stimulus);
   int children;
   int current = BMU;
   float factor = learningRate;
   //update neuron current
-  for (int i =0 ; i <neurons(current,_).size(); i++){
-    neurons(current,i) = neurons(current,i) - factor* (neurons(current,i) - stimulus[i]);
-  }
 
+  for (int i =0 ; i <neurons(current,_).size(); i++){
+    if (mask[i] != true){
+      neurons(current,i) = neurons(current,i) - factor* (neurons(current,i) - stimulus[i]);
+    }
+  }
+  factor = factor*0.9;
   while(current > 0 && radius >= 1){
 
     int currentFatherIndex = ((current + numberOfChildrenperNode - 1 )/numberOfChildrenperNode)-1;
     //neuron update father of current
     for (int i =0 ; i <neurons(currentFatherIndex,_).size(); i++){
-      neurons(currentFatherIndex,i) = neurons(currentFatherIndex,i) - factor* (neurons(currentFatherIndex,i) - stimulus[i]);
+      if (mask[i] != true){
+        neurons(currentFatherIndex,i) = neurons(currentFatherIndex,i) - factor* (neurons(currentFatherIndex,i) - stimulus[i]);
+      }
     }
     for (int i = 1; i <=numberOfChildrenperNode && radius>=1 ;i++){
       //la expresion (-i+1) proviene de una relacion entre el indice i la ubicaicon del hijo respectivo
@@ -91,7 +97,9 @@ NumericMatrix updateTree(NumericMatrix neurons, const NumericVector stimulus,
       if (children != current){
         //neuron update Siblings of current
         for (int i =0 ; i <neurons(children,_).size(); i++){
-          neurons(children,i) = neurons(children,i) - (factor*0.2) * (neurons(children,i) - stimulus[i]);
+          if (mask[i] != true){
+            neurons(children,i) = neurons(children,i) - (factor*0.2) * (neurons(children,i) - stimulus[i]);
+          }
         }
 
       }
@@ -197,10 +205,18 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
   int minD =0;
   int maxData = data(_,0).size()-1;
   int indexDato ;
+
+  LogicalVector mask;
+
   for (int i = 0; i < neuronsSize; i++) {
     indexDato = minD + ((double) rand() / (RAND_MAX)) * (maxData - minD);
-    neurons(i,_) = data(indexDato,_);
 
+    mask = is_na(data(indexDato,_));
+    if(sum(mask) != 0){  //NA in DATA
+      i = i-1;
+    } else{
+      neurons(i,_) = data(indexDato,_);
+    }
   }
   //neurons listas para mover
 
@@ -477,3 +493,22 @@ Rcpp::DataFrame trainSOM_Rcpp(int numberColumn,int numberRow,float initialLearni
 }
 
 
+
+
+// [[Rcpp::export]]
+bool pruebaNA(DataFrame data){
+  NumericMatrix dataMatrix = internal::convert_using_rfunction(data, "as.matrix");
+  NumericVector oneData;
+  int maxData = dataMatrix(_,0).size();
+  LogicalVector mask;
+  for(int i = 0; i < maxData;i++){
+    oneData = dataMatrix(i,_);
+    mask = is_na(oneData);
+    Rcout << mask << std::endl;
+    if(sum(mask) != 0){
+      Rcout <<  "encontrado NA" << std::endl;
+    }
+  }
+
+  return mask;
+}
