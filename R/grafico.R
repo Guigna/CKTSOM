@@ -66,7 +66,7 @@ clusterVisualization <- function(datos,neuronas,numberOfChildrenperNode,vectorCl
       facet_grid(xvar ~ yvar, scales = "free") +
       geom_point(colour = "red",size = 1) +
       geom_point(data = mega_neuronas,size = 1.5,shape = 19)
-    color <- 0
+    color <- 1
     sumaParcial<-0
     ##marca las lineas, agregandole el color por nivel
     for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
@@ -92,7 +92,7 @@ clusterVisualization <- function(datos,neuronas,numberOfChildrenperNode,vectorCl
       facet_grid(xvar ~ yvar, scales = "free") +
       geom_point(colour = mega_data$Categoria,size = 1,alpha=0.55)
 
-    color <- 0
+    color <- 1
     sumaParcial<-0
     ##marca las lineas, agregandole el color por nivel
     for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
@@ -169,85 +169,58 @@ visualizationSOM <- function(datos,neuronas,numberColumn){
 }
 
 
-##mejorar el codigo de grafico //tiene basura
-clusterVisualization <- function(datos,neuronas,numberOfChildrenperNode,vectorClusters = NA,vectorClusterData = NA, colorEdge = FALSE){
-  #busca el BMU de cada dato
-  if(is.na(vectorClusters) || is.na(vectorClusterData)){
-    gg1 = makePairs(datos)
-    mega_iris = data.frame(gg1$all)
 
-    ggneurona = makePairs(neuronas)
-    mega_neuronas = data.frame(ggneurona$all)
-    #mega_neuronas = data.frame(ggneurona$all, Species=rep(iris$Species, length=nrow(ggneurona$all)))
+clusterVisualizationOnePlot <- function(datos,neuronas,numberOfChildrenperNode,vectorClusters = NA,
+                                        vectorClusterData = NA,x=1,y=2 , colorEdge = FALSE){
 
-    # mi pairs plot
-    p <-ggplot(mega_iris, aes_string(x = "x", y = "y")) +
-      facet_grid(xvar ~ yvar, scales = "free") +
-      geom_point(colour = "red",size = 1) +
-      geom_point(data = mega_neuronas,size = 1.5,shape = 19)
-    color <- 1
-    sumaParcial<-0
-    ##marca las lineas, agregandole el color por nivel
-    for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
-      if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
-        sumaParcial<- sumaParcial +numberOfChildrenperNode^color
-        color <- color +1
+  max <-length(data[1,])
+  if (x>0 && x <= max && y >0 && y <=max){
+    colum<- c(x,y)
+    datos<- datos[,colum]
+    neuronas<- neuronas[,colum]
+
+    name<- names(datos)
+
+
+
+    if(is.na(vectorClusters) || is.na(vectorClusterData)){
+      # mi pairs plot
+      p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
+        geom_point(colour = "red",size = 1) +
+        geom_point(data = neuronas,size = 1.5,shape = 19)
+      color <- 0
+      sumaParcial<-0
+      ##marca las lineas, agregandole el color por nivel
+      for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
+        if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
+          sumaParcial<- sumaParcial +numberOfChildrenperNode^color
+          color <- color +1
+        }
+        p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),],colour = color+1)
       }
-      for(j in 0:(length(mega_iris[,1]) /length(datos[,1])-1)){
-        p <- p + geom_path(data = mega_neuronas[miniLista(i,numberOfChildrenperNode)+((length(neuronas[,1])*j)),],colour = color+1)
+    } else {
+      # mi pairs plot
+      p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
+        geom_point(colour = vectorClusterData,size = 1) +
+        geom_point(data = neuronas,colour=vectorClusters ,size = 1.5,shape = 19)
+      color <- 0
+      sumaParcial<-0
+      ##marca las lineas, agregandole el color por nivel
+      for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
+        if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
+          sumaParcial<- sumaParcial +numberOfChildrenperNode^color
+          color <- color +1
+        }
+        p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),],colour = color+1)
       }
     }
     p
-  }else{
-    gg1 = makePairs(datos)
-    mega_data = data.frame(gg1$all, Categoria=rep(vectorClusterData, length=nrow(gg1$all)))
-
-
-    ggneurona = makePairs(neuronas)
-    mega_neuronas = data.frame(ggneurona$all, Categoria=rep(vectorClusters, length=nrow(ggneurona$all)))
-
-    # mi pairs plot
-    p <-ggplot(mega_data, aes_string(x = "x", y = "y")) +
-      facet_grid(xvar ~ yvar, scales = "free") +
-      geom_point(colour = mega_data$Categoria,size = 1,alpha=0.55)
-
-    color <- 1
-    sumaParcial<-0
-    ##marca las lineas, agregandole el color por nivel
-    for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
-      if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
-        sumaParcial<- sumaParcial +numberOfChildrenperNode^color
-        color <- color +1
-      }
-      for(j in 0:(length(mega_data[,1]) /length(datos[,1])-1)){
-        p <- p + geom_path(data = mega_neuronas[miniLista(i,numberOfChildrenperNode)+((length(neuronas[,1])*j)),],colour = color)
-      }
-    }
-    p <- p + geom_point(data = mega_neuronas,size = 1.6, stroke = 1,shape = 21,colour = "black", fill =mega_neuronas$Categoria,alpha=1)
-    p
+  } else {
+  x<- paste("x range 1-",max,sep="")
+  y<- paste("y range 1-",max,sep="")
+  print(x)
+  print(y)
   }
 }
 
 
-clusterVisualizationOnePlot <- function(datos,neuronas,numberOfChildrenperNode,x=1,y=2 ,colorEdge = FALSE){
-  colum<- c(x,y)
-  datos<- datos[,colum]
-  neuronas<- neuronas[,colum]
-
-  name<- names(datos)
-  # mi pairs plot
-  p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
-    geom_point(colour = "red",size = 1) +
-    geom_point(data = neuronas,size = 1.5,shape = 19)
-  color <- 0
-  sumaParcial<-0
-  ##marca las lineas, agregandole el color por nivel
-  for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
-    if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
-      sumaParcial<- sumaParcial +numberOfChildrenperNode^color
-      color <- color +1
-    }
-    p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),],colour = color+1)
-  }
-  p
-}
