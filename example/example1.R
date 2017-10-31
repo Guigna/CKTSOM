@@ -26,18 +26,26 @@ tf-ti #print execution time
 ##visualization phase
 ##Display phase without grouping
 clusterVisualization(data,neurons,numberOfChildrenperNode) #plot the scatter plot
+##Only display one plot according to x and y value
+clusterVisualizationOnePlot(data,neurons,numberOfChildrenperNode, x=2,y =1)
+
+
+
 ###########
 #####################    visualization 2
 ###########
-
 ##Grouping of neurons
 numberofGroups <- 3
 clusterVector <- calculateGroups(numberofGroups,numberOfChildrenperNode,treeHeight)
 
 
 ##Calculate the group of each data
-dataBMU<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode,treeHeight)
+groupOfData<- calculateBMUForData(data,neurons,clusterVector,numberOfChildrenperNode,treeHeight)
 
 ##visualization phase
 ##Display phase with grouping
-clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,dataBMU)
+clusterVisualization(data,neurons,numberOfChildrenperNode,clusterVector,groupOfData)
+##Only display one plot according to x and y value
+clusterVisualizationOnePlot(data,neurons,numberOfChildrenperNode,clusterVector,groupOfData,x=2,y=1)
+
+groupOfData ## group of each data
