@@ -14,7 +14,7 @@ data <- readMat("http://homepage.tudelft.nl/n9d04/occ/501/oc_501.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
-strata <- calculateStrata(labels,0.9)
+strata <- calculateStrata(labels,0.5)
 trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 20
 

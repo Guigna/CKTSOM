@@ -293,12 +293,17 @@ validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting
     dataTraining<- data.frame(data,labels)
 
 
-    estratos <- strata( dataTraining, stratanames = c("labels"), size = strataConfig, method = "srswor" )
-    dataTraining <- getdata( dataTraining, estratos )
-    trainingFolk <- dataTraining[,columns]
+    #estratos <- strata( dataTraining, stratanames = c("labels"), size = strataConfig, method = "srswor" )
+    #dataTraining <- getdata( dataTraining, estratos )
     dataTraining <- dataTraining[dataTraining$labels ==1,]
-    dataTraining <- dataTraining[,columns]
+    dataTraining <- dataTraining[sample( 1:nrow( dataTraining ), strataConfig ),]
+    #dataTraining <- dataTraining[dataTraining$labels ==1,]
+
+
+    trainingFolk <- dataTraining[,columns]
     dataTraining <- dataTraining[,-length(dataTraining)]
+
+
     #######train listo               training
 
     # Training with dataTraining
@@ -314,6 +319,7 @@ validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting
     dataTest <- anti_join(originalDataTestLabels, trainingFolk)
     resultadoEsoperado <- dataTest$labels
     dataTest <- dataTest[,-length(dataTest)]
+
     result <- calculateBmuDistance(neurons,dataTest ,numberOfChildrenperNode,treeHeight)
     outliers<-getOutliersMuSigma(result,mu,sigma,howManyStandardDeviations = standardDeviations)
 
@@ -345,21 +351,7 @@ validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting
 
 calculateStrata<- function(label,percentage){
   label <- label -1
-  lengthLabel <- length(label)
-  n <- sum(label)
-  first <- label[1]
-
-  percent <- round(lengthLabel*percentage)
-
-  proportion <- n/lengthLabel
-
-  strata1 <- round(proportion* percent)  #1
-  strata2 <- percent - strata1    #0
-  if (first == 1) {
-    return(c(strata1,strata2))
-  } else{
-    return(c(strata2,strata1))
-  }
+  return (round( sum(label) * percentage))
 }
 
 normalize <- function(x) {
