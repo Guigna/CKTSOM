@@ -17,6 +17,10 @@ findBmuAndDistance <- function(dataNeuron, dataStimulus, numberOfChildrenperNode
     .Call('CKTSOM_findBmuAndDistance', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight)
 }
 
+hardFindBmu <- function(dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight) {
+    .Call('CKTSOM_hardFindBmu', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight)
+}
+
 findBMU <- function(dataNeuron, dataStimulus) {
     .Call('CKTSOM_findBMU', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus)
 }

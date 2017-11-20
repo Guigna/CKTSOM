@@ -60,6 +60,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// hardFindBmu
+int hardFindBmu(DataFrame dataNeuron, DataFrame dataStimulus, int numberOfChildrenperNode, int treeHeight);
+RcppExport SEXP CKTSOM_hardFindBmu(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP, SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type dataNeuron(dataNeuronSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type dataStimulus(dataStimulusSEXP);
+    Rcpp::traits::input_parameter< int >::type numberOfChildrenperNode(numberOfChildrenperNodeSEXP);
+    Rcpp::traits::input_parameter< int >::type treeHeight(treeHeightSEXP);
+    rcpp_result_gen = Rcpp::wrap(hardFindBmu(dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight));
+    return rcpp_result_gen;
+END_RCPP
+}
 // findBMU
 int findBMU(DataFrame dataNeuron, DataFrame dataStimulus);
 RcppExport SEXP CKTSOM_findBMU(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP) {

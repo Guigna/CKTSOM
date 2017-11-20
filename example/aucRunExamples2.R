@@ -10,13 +10,13 @@ library(beepr)
 
 
 ###############
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/501/oc_501.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(numberOfChildrenperNode = 4)
-howManyAuc <- 5
+trainSettings <- getDefaultTraingSettings()
+howManyAuc <- 20
 
 ## calculate AUC
 vectorStandartDesviation <- seq(0.1, 3, 0.1)
@@ -28,15 +28,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out512a <- out
-beep("mario")
+out501 <- out
+###########################
 ###############
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/502/oc_502.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 4)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -49,15 +49,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out512b <- out
-beep("mario")
+out502 <- out
+###########################
 ###############
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/503/oc_503.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 4,numberOfChildrenperNode = 4)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -70,15 +70,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out512c <- out
-beep("mario")
+out503 <- out
+###########################
 ###############
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/504/oc_504.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 5,numberOfChildrenperNode = 4)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -87,20 +87,19 @@ out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
 n<- 1
 for (standardDeviations in vectorStandartDesviation) {
   aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
-  print(n)
   out[n,] <- aucCalculate
   n<- n+1
 }
 
-out512d <- out
-beep("mario")
+out504 <- out
+###########################
 ###############
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/505/oc_505.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 4,numberOfChildrenperNode = 5)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -109,20 +108,19 @@ out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
 n<- 1
 for (standardDeviations in vectorStandartDesviation) {
   aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
-  print(n)
   out[n,] <- aucCalculate
   n<- n+1
 }
 
-out512e <- out
-beep("mario")
+out505 <- out
+###########################
 ###############
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/506/oc_506.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 5,numberOfChildrenperNode = 5)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -131,34 +129,61 @@ out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
 n<- 1
 for (standardDeviations in vectorStandartDesviation) {
   aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
-  print(n)
   out[n,] <- aucCalculate
   n<- n+1
 }
 
-out512f <- out
-beep("mario")
+out506 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/507/oc_507.mat")
+## set parameters
+dataT <-data.frame(data$x$data)
+labels <- data$x$nlab
+strata <- calculateStrata(labels,0.9)
+trainSettings <- getDefaultTraingSettings()
+howManyAuc <- 5
 
+## calculate AUC
+vectorStandartDesviation <- seq(0.1, 3, 0.1)
+out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+n<- 1
+for (standardDeviations in vectorStandartDesviation) {
+  aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
+  out[n,] <- aucCalculate
+  n<- n+1
+}
 
+out507 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/508/oc_508.mat")
+## set parameters
+dataT <-data.frame(data$x$data)
+labels <- data$x$nlab
+strata <- calculateStrata(labels,0.9)
+trainSettings <- getDefaultTraingSettings()
+howManyAuc <- 5
 
+## calculate AUC
+vectorStandartDesviation <- seq(0.1, 3, 0.1)
+out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+n<- 1
+for (standardDeviations in vectorStandartDesviation) {
+  aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
+  out[n,] <- aucCalculate
+  n<- n+1
+}
 
-
-
-
-
-
-
-
-
-
-
-###########
+out508 <- out
+###########################
+###############
 data <- readMat("http://homepage.tudelft.nl/n9d04/occ/509/oc_509.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 5,numberOfChildrenperNode = 4,numberOfIterations=700000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -167,20 +192,19 @@ out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
 n<- 1
 for (standardDeviations in vectorStandartDesviation) {
   aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
-  print(n)
   out[n,] <- aucCalculate
   n<- n+1
 }
 
-out509b <- out
-beep("mario")
-############
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/511/oc_511.mat")
+out509 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/511/oc_511.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 5,numberOfChildrenperNode = 5,numberOfIterations=700000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -193,18 +217,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509c <- out
-beep("mario")
-
-
-
-###########
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
+out511 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/512/oc_512.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 6,numberOfChildrenperNode = 5,numberOfIterations=800000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -217,17 +238,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509d <- out
-beep("mario")
-
-
-###########
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
+out512 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/513/oc_513.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 6,numberOfChildrenperNode = 6,numberOfIterations=800000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -240,16 +259,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509e <- out
-beep("mario")
-
-###########
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
+out513 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 7,numberOfChildrenperNode = 6,numberOfIterations=800000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -262,16 +280,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509f <- out
-beep("mario")
-
-###########
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
+out514 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/515/oc_515.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 7,numberOfChildrenperNode = 7,numberOfIterations=800000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -284,16 +301,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509g <- out
-beep("mario")
-
-###########
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
+out515 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/516/oc_516.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 8,numberOfChildrenperNode = 7,numberOfIterations=800000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -306,16 +322,15 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509h <- out
-beep("mario")
-
-###########
-#data <- readMat("http://homepage.tudelft.nl/n9d04/occ/514/oc_514.mat")
+out516 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/517/oc_517.mat")
 ## set parameters
 dataT <-data.frame(data$x$data)
 labels <- data$x$nlab
 strata <- calculateStrata(labels,0.9)
-trainSettings <- getDefaultTraingSettings(treeHeight = 8,numberOfChildrenperNode = 8,numberOfIterations=900000)
+trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
 ## calculate AUC
@@ -328,40 +343,81 @@ for (standardDeviations in vectorStandartDesviation) {
   n<- n+1
 }
 
-out509i <- out
-beep("mario")
+out517 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/518/oc_518.mat")
+## set parameters
+dataT <-data.frame(data$x$data)
+labels <- data$x$nlab
+strata <- calculateStrata(labels,0.9)
+trainSettings <- getDefaultTraingSettings()
+howManyAuc <- 5
 
+## calculate AUC
+vectorStandartDesviation <- seq(0.1, 3, 0.1)
+out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+n<- 1
+for (standardDeviations in vectorStandartDesviation) {
+  aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
+  out[n,] <- aucCalculate
+  n<- n+1
+}
 
+out518 <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/519/oc_519.mat")
+## set parameters
+dataT <-data.frame(data$x$data)
+labels <- data$x$nlab
+strata <- calculateStrata(labels,0.9)
+trainSettings <- getDefaultTraingSettings()
+howManyAuc <- 5
 
+## calculate AUC
+vectorStandartDesviation <- seq(0.1, 3, 0.1)
+out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+n<- 1
+for (standardDeviations in vectorStandartDesviation) {
+  aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
+  out[n,] <- aucCalculate
+  n<- n+1
+}
 
+out519b <- out
+###########################
+###############
+data <- readMat("http://homepage.tudelft.nl/n9d04/occ/520/oc_520.mat")
+## set parameters
+dataT <-data.frame(data$x$data)
+labels <- data$x$nlab
+strata <- calculateStrata(labels,0.9)
+trainSettings <- getDefaultTraingSettings()
+howManyAuc <- 5
 
+## calculate AUC
+vectorStandartDesviation <- seq(0.1, 3, 0.1)
+out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+n<- 1
+for (standardDeviations in vectorStandartDesviation) {
+  aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
+  out[n,] <- aucCalculate
+  n<- n+1
+}
 
+out520 <- out
+###########################
+out501[1,3] <- mean(c(out501[1,1],out501[1,2],out501[1,3],out501[1,4]))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+out518[29,5] <- mean(c(out518[29,1],out518[29,2]))
+out518[30,4] <- mean(c(out518[30,1],out518[30,2],out518[30,3]))
 
 ###########################################################
-out <- out514a
+out <- out501
+out
+
+
 
 
 ## Mean AUC
@@ -384,34 +440,5 @@ maxAUC * 100
 matc <- match(maxAUC,meanAuc)
 vectorStandartDesviation[matc]
 
-write.csv(out, file = "514  Arrhythmia normal h=4.csv")
+write.csv(out, file = "520 Concordia16 digit 0")
 
-
-
-
-##
-#COmprar los graficos para ver patrones en la capacidad de domprimir los datos
-# usar el primer grafico a la derecha
-
-##Jugar con la configuracion del arbol para hacerlo trabajar con lso datos donde se encontro mejor resultado
-# probar con los otros data si afecta el usar un arbol diferente (mas grande)
-
-
-##PCA
-
-#######3Imagen para el rank
-
-
-rank$Promedio
-
-ggplot(data=rank, aes(x=Nombre, y=Promedio)) + geom_bar(stat="identity")
-
-
-ggplot(data=rank, aes(x=reorder(Nombre,+Promedio), y=Promedio, fill=reorder(Nombre,+Promedio))) +
-  geom_bar(stat="identity") + xlab("") + ylab ("") + scale_x_discrete(NULL) + theme(axis.title.x=element_blank(),
-                                                                                    axis.text.x=element_blank(),
-                                                                                    axis.ticks.x=element_blank())+
-  guides(fill=guide_legend(title="Classifiers "))
-
-
-## 1200 x 600

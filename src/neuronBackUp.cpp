@@ -70,3 +70,28 @@ NumericVector findBmuAndDistance(DataFrame dataNeuron,DataFrame dataStimulus,int
   result[1] = calculateEuclideanDistance2PointSquare(dataNeuronMatrix(result[0],_),stimulus);
   return result;
 }
+
+// [[Rcpp::export]]
+int hardFindBmu(DataFrame dataNeuron,DataFrame dataStimulus,int numberOfChildrenperNode, int treeHeight){
+  NumericVector result(2);
+
+  NumericMatrix dataNeuronMatrix = internal::convert_using_rfunction(dataNeuron, "as.matrix");
+
+  NumericMatrix dataStimulusMatrix = internal::convert_using_rfunction(dataStimulus, "as.matrix");
+  NumericVector stimulus = dataStimulusMatrix(0,_);
+
+  int lastfather = dataNeuronMatrix(_,0).size()-pow(numberOfChildrenperNode,treeHeight);
+  NumericMatrix neuronsChildren(pow(numberOfChildrenperNode,treeHeight),stimulus.size());
+  for(int i = 0; i < neuronsChildren(_,0).size(); i++){
+    neuronsChildren(i,_) = dataNeuronMatrix(lastfather+i,_);
+  }
+
+
+    //calcula la distancia de el estimulo a las neuronas del nivel
+  NumericVector dist = distance(neuronsChildren,stimulus);
+  NumericVector::iterator it = std::min_element(dist.begin(), dist.end());
+
+  //cambia el BMU al hijo mas cercano
+  return lastfather + it - dist.begin();
+
+}

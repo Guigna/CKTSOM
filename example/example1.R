@@ -7,7 +7,7 @@ setSeed(543)
 
 ##################### EXAMPLE 1 : IRIS DATASET
 ###parameters
-numberOfIterations <- 600000
+numberOfIterations <- 1000000
 initialLearningRate <- 1
 finalLearningRate<- 0
 initialRadius <- 7
@@ -22,7 +22,7 @@ ti <- proc.time() # start timer
 neurons <- train(numberOfChildrenperNode,treeHeight,initialLearningRate,finalLearningRate,initialRadius,finalRadius,numberOfIterations, data)
 tf <-proc.time()    # stop timer
 tf-ti #print execution time
-
+beep("mario")
 ##visualization phase
 ##Display phase without grouping
 clusterVisualization(data,neurons,numberOfChildrenperNode) #plot the scatter plot

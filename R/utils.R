@@ -273,7 +273,7 @@ getDefaultTraingSettings<-function(numberOfChildrenperNode = 3,treeHeight =3,
 }
 
 validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc = 5){
-  repMax <- 3*howManyAuc
+  repMax <- 10*howManyAuc
   repAct<-1
   aucFinal <- rep(NA,howManyAuc)
   numberOfChildrenperNode <- trainSeting[1]
@@ -361,5 +361,19 @@ calculateStrata<- function(label,percentage){
     return(c(strata2,strata1))
   }
 }
+
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+
+normalizeDataFRame<- function(dataFrame) {
+  dim <- length(dataFrame[1,])
+  for (i in c(1:dim)){
+    dataFrame[,i] <- normalize( dataFrame[,i])
+  }
+  dataFrame[dataFrame==NaN] <- 0
+  return(dataFrame)
+}
+
 
 
