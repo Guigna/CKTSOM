@@ -272,36 +272,42 @@ getDefaultTraingSettings<-function(numberOfChildrenperNode = 3,treeHeight =3,
   return(trainSeting)
 }
 
-validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting,howManyAuc = 5){
+validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,howManyAuc = 5){
   repMax <- 10*howManyAuc
   repAct<-1
   aucFinal <- rep(NA,howManyAuc)
-  numberOfChildrenperNode <- trainSeting[1]
-  treeHeight <- trainSeting[2]
-  initialLearningRate <- trainSeting[3]
-  finalLearningRate <- trainSeting[4]
-  initialRadius <- trainSeting[5]
-  finalRadius <- trainSeting[6]
-  numberOfIterations <- trainSeting[7]
+  numberOfChildrenperNode <- trainSettings[1]
+  treeHeight <- trainSettings[2]
+  initialLearningRate <- trainSettings[3]
+  finalLearningRate <- trainSettings[4]
+  initialRadius <- trainSettings[5]
+  finalRadius <- trainSettings[6]
+  numberOfIterations <- trainSettings[7]
 
   labels <- labels -1
   columns<- c(1:(length(data)+1))
   i <- 1
+
+
+
   while (i<=howManyAuc) {
 
     ##train
-    dataTraining<- data.frame(data,labels)
+    #dataTraining<- data.frame(data,labels)
 
 
     #estratos <- strata( dataTraining, stratanames = c("labels"), size = strataConfig, method = "srswor" )
     #dataTraining <- getdata( dataTraining, estratos )
-    dataTraining <- dataTraining[dataTraining$labels ==1,]
-    dataTraining <- dataTraining[sample( 1:nrow( dataTraining ), strataConfig ),]
+    dataTraining <- data[labels ==1,]
+
+    idTrain<-sample( 1:nrow( dataTraining ), strataConfig )
+
+    dataTraining <- data[idTrain,]
     #dataTraining <- dataTraining[dataTraining$labels ==1,]
 
 
-    trainingFolk <- dataTraining[,columns]
-    dataTraining <- dataTraining[,-length(dataTraining)]
+    #trainingFolk <- dataTraining[,columns]
+    #dataTraining <- dataTraining[,-length(dataTraining)]
 
 
     #######train listo               training
@@ -315,9 +321,9 @@ validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting
 
     #########data test
 
-    originalDataTestLabels<- data.frame(data,labels)
-    dataTest <- anti_join(originalDataTestLabels, trainingFolk)
-    resultadoEsoperado <- dataTest$labels
+    #originalDataTestLabels<- data.frame(data,labels)
+    dataTest <- data[-idTrain,]
+    resultadoEsoperado <- labels[-idTrain]
     dataTest <- dataTest[,-length(dataTest)]
 
     result <- calculateBmuDistance(neurons,dataTest ,numberOfChildrenperNode,treeHeight)
@@ -349,6 +355,7 @@ validate5x10cv<-function(data,labels,strataConfig,standardDeviations,trainSeting
 
 
 
+
 calculateStrata<- function(label,percentage){
   label <- label -1
   return (round( sum(label) * percentage))
@@ -358,14 +365,33 @@ normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
 
-normalizeDataFRame<- function(dataFrame) {
-  dim <- length(dataFrame[1,])
+normalizeDataFRame<- function(data) {
+  dim <- length(data[1,])
   for (i in c(1:dim)){
-    dataFrame[,i] <- normalize( dataFrame[,i])
+    data[,i] <- normalize( data[,i])
   }
-  dataFrame[dataFrame==NaN] <- 0
-  return(dataFrame)
+  data[data==NaN] <- 0
+  return(data)
 }
 
+calculateRMSE<- function(data,trainSettings){
 
+  numberOfChildrenperNode <- trainSettings[1]
+  treeHeight <- trainSettings[2]
+  initialLearningRate <- trainSettings[3]
+  finalLearningRate <- trainSettings[4]
+  initialRadius <- trainSettings[5]
+  finalRadius <- trainSettings[6]
+  numberOfIterations <- trainSettings[7]
+
+  neurons <- train(numberOfChildrenperNode,treeHeight,initialLearningRate,finalLearningRate,initialRadius,finalRadius,numberOfIterations, data)
+
+  out <- matrix(, nrow = length(data[,1]), ncol = 2)
+  for(i in c(1:length(data[,1]))){
+    out[i,] <- findBmuAndDistance(neurons,data[i,],numberOfChildrenperNode,treeHeight)
+  }
+  RMSE <- sqrt(mean(out[,2]))  ### el out[2] esta elevado
+
+  return (RMSE)
+}
 
