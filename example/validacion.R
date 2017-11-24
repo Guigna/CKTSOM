@@ -1,12 +1,12 @@
 #Carga los datos
-dataMat <- readMat("http://homepage.tudelft.nl/n9d04/occ/590/oc_590.mat")
+dataMat <- readMat("http://homepage.tudelft.nl/n9d04/occ/519/oc_519.mat")
 ################################################          1           ################################
 ###########   obtiene el RMSE para el dato cargado, entregando un rango y la iteracion
 ################################################          1           ################################
 ## set parameters
 data <-data.frame(dataMat$x$data)
 trainSettings <- getDefaultTraingSettings(numberOfChildrenperNode = 3,treeHeight = 3,
-                                          initialLearningRate =0.8 ,finalLearningRate = 0.0,
+                                          initialLearningRate =1 ,finalLearningRate = 0.0,
                                           initialRadius = 3,finalRadius = 0)
 total <- 10   ## cantidad de pruebas
 iteraciones <- c(1:total)
@@ -19,8 +19,7 @@ for ( i in iteraciones){
   RMSE[i]<- calculateRMSE(data,trainSettings)    # Calcula el RMSE
   iteraciones[i] <- iteracion
   iteracion <- iteracion * 4    ## INtervalos de iteraciones
-  print(i)
-}
+  print(i)}
 
 RMSE  #muestra en pantalla los valores de RMSE
 iteraciones  #muestra en pantalla las iteraciones para los RMSE mostrados

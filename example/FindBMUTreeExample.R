@@ -18,7 +18,7 @@ treeHeight <- 3
 ##training phase
 
 
-dataMAT <- readMat("http://homepage.tudelft.nl/n9d04/occ/570/oc_570.mat")
+dataMAT <- readMat("http://homepage.tudelft.nl/n9d04/occ/576/oc_576.mat")
 ## set parameters
 data <-data.frame(dataMAT$x$data)
 
@@ -27,7 +27,7 @@ data <-data.frame(dataMAT$x$data)
 
 
 #######
-ciclos <- 5
+ciclos <- 6
 list <- c(0:ciclos)
 salidas <- c(1:ciclos+1)
 itera <- c(1:ciclos+1)
@@ -100,7 +100,7 @@ for(iteracion in iteracionVectorr){
   neuronTemporal[is.na(neuronTemporal)] <- 0
   distancia<- c(1:length(data[,1]))
   for(i in distancia){
-    distancia[i] <- sum(sqrt((neuronTemporal[vectorHardFindMatrix[i,iteracion],] -   neuronTemporal[vectorTrreFindMatrix[i,iteracion],])**2))
+    distancia[i] <- sqrt(sum(sqrt((neuronTemporal[vectorHardFindMatrix[i,iteracion],] -   neuronTemporal[vectorTrreFindMatrix[i,iteracion],])**2)))
 
   }
   iteracionVectorr[iteracion]<- mean(distancia)
