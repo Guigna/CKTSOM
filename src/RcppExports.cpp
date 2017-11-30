@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // train_Rcpp
 Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode, int treeHeight, float initialLearningRate, float finalLearningRate, int initialRadius, int finalRadius, unsigned long iterations, Rcpp::List lst, Rcpp::CharacterVector Names);
-RcppExport SEXP CKTSOM_train_Rcpp(SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP, SEXP initialLearningRateSEXP, SEXP finalLearningRateSEXP, SEXP initialRadiusSEXP, SEXP finalRadiusSEXP, SEXP iterationsSEXP, SEXP lstSEXP, SEXP NamesSEXP) {
+RcppExport SEXP _CKTSOM_train_Rcpp(SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP, SEXP initialLearningRateSEXP, SEXP finalLearningRateSEXP, SEXP initialRadiusSEXP, SEXP finalRadiusSEXP, SEXP iterationsSEXP, SEXP lstSEXP, SEXP NamesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -26,7 +26,7 @@ END_RCPP
 }
 // set_seed
 void set_seed(int seed);
-RcppExport SEXP CKTSOM_set_seed(SEXP seedSEXP) {
+RcppExport SEXP _CKTSOM_set_seed(SEXP seedSEXP) {
 BEGIN_RCPP
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type seed(seedSEXP);
@@ -36,7 +36,7 @@ END_RCPP
 }
 // calculateEuclideanDistance
 float calculateEuclideanDistance(const DataFrame point1, const DataFrame point2);
-RcppExport SEXP CKTSOM_calculateEuclideanDistance(SEXP point1SEXP, SEXP point2SEXP) {
+RcppExport SEXP _CKTSOM_calculateEuclideanDistance(SEXP point1SEXP, SEXP point2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -48,7 +48,7 @@ END_RCPP
 }
 // findBmuAndDistance
 NumericVector findBmuAndDistance(DataFrame dataNeuron, DataFrame dataStimulus, int numberOfChildrenperNode, int treeHeight);
-RcppExport SEXP CKTSOM_findBmuAndDistance(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP, SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP) {
+RcppExport SEXP _CKTSOM_findBmuAndDistance(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP, SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -62,7 +62,7 @@ END_RCPP
 }
 // hardFindBmu
 int hardFindBmu(DataFrame dataNeuron, DataFrame dataStimulus, int numberOfChildrenperNode, int treeHeight);
-RcppExport SEXP CKTSOM_hardFindBmu(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP, SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP) {
+RcppExport SEXP _CKTSOM_hardFindBmu(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP, SEXP numberOfChildrenperNodeSEXP, SEXP treeHeightSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -76,7 +76,7 @@ END_RCPP
 }
 // findBMU
 int findBMU(DataFrame dataNeuron, DataFrame dataStimulus);
-RcppExport SEXP CKTSOM_findBMU(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP) {
+RcppExport SEXP _CKTSOM_findBMU(SEXP dataNeuronSEXP, SEXP dataStimulusSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -88,7 +88,7 @@ END_RCPP
 }
 // trainSOM_Rcpp
 Rcpp::DataFrame trainSOM_Rcpp(int numberColumn, int numberRow, float initialLearningRate, float finalLearningRate, int initialRadius, int finalRadius, int iterations, Rcpp::List lst, Rcpp::CharacterVector Names);
-RcppExport SEXP CKTSOM_trainSOM_Rcpp(SEXP numberColumnSEXP, SEXP numberRowSEXP, SEXP initialLearningRateSEXP, SEXP finalLearningRateSEXP, SEXP initialRadiusSEXP, SEXP finalRadiusSEXP, SEXP iterationsSEXP, SEXP lstSEXP, SEXP NamesSEXP) {
+RcppExport SEXP _CKTSOM_trainSOM_Rcpp(SEXP numberColumnSEXP, SEXP numberRowSEXP, SEXP initialLearningRateSEXP, SEXP finalLearningRateSEXP, SEXP initialRadiusSEXP, SEXP finalRadiusSEXP, SEXP iterationsSEXP, SEXP lstSEXP, SEXP NamesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -104,4 +104,20 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(trainSOM_Rcpp(numberColumn, numberRow, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_CKTSOM_train_Rcpp", (DL_FUNC) &_CKTSOM_train_Rcpp, 9},
+    {"_CKTSOM_set_seed", (DL_FUNC) &_CKTSOM_set_seed, 1},
+    {"_CKTSOM_calculateEuclideanDistance", (DL_FUNC) &_CKTSOM_calculateEuclideanDistance, 2},
+    {"_CKTSOM_findBmuAndDistance", (DL_FUNC) &_CKTSOM_findBmuAndDistance, 4},
+    {"_CKTSOM_hardFindBmu", (DL_FUNC) &_CKTSOM_hardFindBmu, 4},
+    {"_CKTSOM_findBMU", (DL_FUNC) &_CKTSOM_findBMU, 2},
+    {"_CKTSOM_trainSOM_Rcpp", (DL_FUNC) &_CKTSOM_trainSOM_Rcpp, 9},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_CKTSOM(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

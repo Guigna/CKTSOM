@@ -2,30 +2,30 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 train_Rcpp <- function(numberOfChildrenperNode, treeHeight, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names = as.character( c())) {
-    .Call('CKTSOM_train_Rcpp', PACKAGE = 'CKTSOM', numberOfChildrenperNode, treeHeight, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names)
+    .Call('_CKTSOM_train_Rcpp', PACKAGE = 'CKTSOM', numberOfChildrenperNode, treeHeight, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names)
 }
 
 set_seed <- function(seed) {
-    invisible(.Call('CKTSOM_set_seed', PACKAGE = 'CKTSOM', seed))
+    invisible(.Call('_CKTSOM_set_seed', PACKAGE = 'CKTSOM', seed))
 }
 
 calculateEuclideanDistance <- function(point1, point2) {
-    .Call('CKTSOM_calculateEuclideanDistance', PACKAGE = 'CKTSOM', point1, point2)
+    .Call('_CKTSOM_calculateEuclideanDistance', PACKAGE = 'CKTSOM', point1, point2)
 }
 
 findBmuAndDistance <- function(dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight) {
-    .Call('CKTSOM_findBmuAndDistance', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight)
+    .Call('_CKTSOM_findBmuAndDistance', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight)
 }
 
 hardFindBmu <- function(dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight) {
-    .Call('CKTSOM_hardFindBmu', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight)
+    .Call('_CKTSOM_hardFindBmu', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus, numberOfChildrenperNode, treeHeight)
 }
 
 findBMU <- function(dataNeuron, dataStimulus) {
-    .Call('CKTSOM_findBMU', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus)
+    .Call('_CKTSOM_findBMU', PACKAGE = 'CKTSOM', dataNeuron, dataStimulus)
 }
 
 trainSOM_Rcpp <- function(numberColumn, numberRow, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names = as.character( c())) {
-    .Call('CKTSOM_trainSOM_Rcpp', PACKAGE = 'CKTSOM', numberColumn, numberRow, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names)
+    .Call('_CKTSOM_trainSOM_Rcpp', PACKAGE = 'CKTSOM', numberColumn, numberRow, initialLearningRate, finalLearningRate, initialRadius, finalRadius, iterations, lst, Names)
 }
 

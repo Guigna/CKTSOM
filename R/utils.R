@@ -499,18 +499,14 @@ pruebas<- function(dataMat,iniLearn,hijosPerNode,iteraciones){
 }
 
 #####################
-calculateRMSE <- function(data,trainSettings,iteracionIni = 10,iteracionStep = 4, Niteracion = 10,seed = 543){
-  total <- Niteracion   ## cantidad de pruebas
-  iteraciones <- c(1:total)
-  RMSEout <- c(1:total)
-  iteracion <- iteracionIni    #  iteracion inicial
-
+calculateRMSE <- function(data,trainSettings,log = c(1:3),seed = 543){
+  iteraciones <- c(1:length(log))
+  RMSEout <- c(1:length(log))
   for ( i in iteraciones){
     setSeed(seed)
-    trainSettings[7] <-iteracion
+    trainSettings[7] <-log[i]
     RMSEout[i]<- oneRMSE(data,trainSettings)    # Calcula el RMSE
-    iteraciones[i] <- iteracion
-    iteracion <- iteracion * iteracionStep    ## INtervalos de iteraciones
+    iteraciones[i] <- log[i]
     #print(i)
   }
 
