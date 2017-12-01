@@ -516,34 +516,25 @@ calculateRMSE <- function(data,trainSettings,log = c(1:3),seed = 543){
 }
 ############
 
-calculateAUC<- function(data,labels,trainSettings,seed = 543){
-  hijosPerNode <- trainSettings[1]       # <- numberOfChildrenperNode
-  altura <- trainSettings[2]             # <- treeHeight
-  iniLearn <- trainSettings[3]           # <- initialLearningRate
-  finLearn <- trainSettings[4]           # <- finalLearningRate
-  #initialRadius <- trainSettings[5]       <- initialRadius
-  finalR<- trainSettings[6]              # <- finalRadius
-  iteraciones <- trainSettings[7]        # <- numberOfIterations
+calculateAUC<- function(data,labels,
+                        numberOfChildrenperNodeList=c(2),
+                        treeHeightList = c(3,4),
+                        initialLearningRateList = c(1,0.8,0.5),
+                        finalLearningRateList = c(0.0),
+                        initialRadiusList = c(3,6),
+                        finalRadiusList = c(0),
+                        numberOfIterationsList= c(1000,10000),
+                        seed = 543){
 
-
-
-  totalPruebas<- 3
-
-  trainignSetingMatrix <- matrix(ncol = 7,nrow = totalPruebas)
-
-
-  trainignSetingMatrix[1,]<- getDefaultTraingSettings(numberOfChildrenperNode = hijosPerNode,treeHeight = altura,
-                                                      initialLearningRate =iniLearn ,finalLearningRate = finLearn,
-                                                      initialRadius = altura*2,finalRadius = finalR,
-                                                      numberOfIterations = iteraciones)
-  trainignSetingMatrix[2,]<- getDefaultTraingSettings(numberOfChildrenperNode = hijosPerNode,treeHeight = altura,
-                                                      initialLearningRate =iniLearn ,finalLearningRate = finLearn,
-                                                      initialRadius = altura,finalRadius = finalR,
-                                                      numberOfIterations = iteraciones)
-  trainignSetingMatrix[3,]<- getDefaultTraingSettings(numberOfChildrenperNode = hijosPerNode,treeHeight = altura,
-                                                      initialLearningRate =iniLearn ,finalLearningRate = finLearn,
-                                                      initialRadius = round(altura*0.5),finalRadius = finalR,
-                                                      numberOfIterations = iteraciones)
+  totalPruebas <- length(numberOfChildrenperNodeList) *
+    length(treeHeightList)*
+    length(initialLearningRateList)*
+    length(finalLearningRateList)*
+    length(initialRadiusList)*
+    length(finalRadiusList)*
+    length(numberOfIterationsList)
+  print("Total pruebas:")
+  print(totalPruebas)
 
 
   strata <- calculateStrata(labels,0.5)
@@ -553,35 +544,57 @@ calculateAUC<- function(data,labels,trainSettings,seed = 543){
 
   resultados <-matrix(ncol = 10,nrow = totalPruebas)
   #iterar
-  for(prueba in 1:totalPruebas){
-    trainSettings <- trainignSetingMatrix[prueba,]
+  nn<-1
+  ##########
+  for (numberOfchildren in numberOfChildrenperNodeList) {
+    for (treeHig in treeHeightList) {
+      for (iniLearn in initialLearningRateList) {
+        for (finalLearn in finalLearningRateList) {
+          for (iniRadius in initialRadiusList) {
+            for (finaRadiu in finalRadiusList) {
+              for (numbreOfItera in numberOfIterationsList) {
+                trainSettings <- getDefaultTraingSettings(numberOfChildrenperNode = numberOfchildren,treeHeight = treeHig,
+                                                          initialLearningRate =iniLearn ,finalLearningRate = finalLearn,
+                                                          initialRadius = iniRadius,finalRadius = finaRadiu,
+                                                          numberOfIterations = numbreOfItera)
+                out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
+                n<- 1
+                for (standardDeviations in vectorStandartDesviation) {
+                  setSeed(seed)
+                  aucCalculate <- validate(data,labels,strata,standardDeviations,trainSettings,howManyAuc) ## una ejecucion
+
+                  out[n,] <- aucCalculate
+                  n<- n+1
+                }
+                #print(prueba)
+                ## Mean AUC
+                meanAuc <- c(1:length(out[,1]))
+                for (i in c(1:length(out[,1]))) {
+                  meanAuc[i]<- mean(out[i,])
+                }
 
 
-    out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
-    n<- 1
+                maxAUC <-max(meanAuc)
+                matc <- match(maxAUC,meanAuc)
+                resultados[nn,]<-c(trainSettings,maxAUC * 100,sd(out[matc,])*100,vectorStandartDesviation[matc])
 
-    for (standardDeviations in vectorStandartDesviation) {
-      setSeed(seed)
-      aucCalculate <- validate(data,labels,strata,standardDeviations,trainSettings,howManyAuc) ## una ejecucion
+                print(nn)
+                nn <- nn+1
+              }
 
-      out[n,] <- aucCalculate
-      n<- n+1
+            }
+
+          }
+
+        }
+
+      }
     }
-    print(prueba)
-    ## Mean AUC
-    meanAuc <- c(1:length(out[,1]))
-    for (i in c(1:length(out[,1]))) {
-      meanAuc[i]<- mean(out[i,])
-    }
-
-
-    maxAUC <-max(meanAuc)
-    matc <- match(maxAUC,meanAuc)
-    resultados[prueba,]<-c(trainSettings,maxAUC * 100,sd(out[matc,])*100,vectorStandartDesviation[matc])
 
   }
   print("k h ai af ri rf T AUC sigma theta")
   return(resultados)
+
 }
 
 
