@@ -288,8 +288,6 @@ validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,how
   columns<- c(1:(length(data)+1))
   i <- 1
 
-
-
   while (i<=howManyAuc) {
 
     ##train
@@ -524,6 +522,7 @@ calculateAUC<- function(data,labels,
                         initialRadiusList = c(3,6),
                         finalRadiusList = c(0),
                         numberOfIterationsList= c(1000,10000),
+                        vectorStandartDesviationList = c(0.1,seq(0.5, 3, 0.5)),
                         seed = 543){
 
   totalPruebas <- length(numberOfChildrenperNodeList) *
@@ -540,7 +539,7 @@ calculateAUC<- function(data,labels,
   strata <- calculateStrata(labels,0.5)
 
   howManyAuc <- 20 # cuantas veces se hace el experimento
-  vectorStandartDesviation <- c(0.1,seq(0.5, 3, 0.5))  ## se genera una secuencia de distinos valores para el z-score   (0.1 0.5 1.0 1.5 2.0 2.5 3.0)
+  vectorStandartDesviation <- vectorStandartDesviationList  ## se genera una secuencia de distinos valores para el z-score   (0.1 0.5 1.0 1.5 2.0 2.5 3.0)
 
   resultados <-matrix(ncol = 10,nrow = totalPruebas)
   #iterar

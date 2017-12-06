@@ -27,6 +27,7 @@ x<-calculateAUC(data,labels,
                 initialRadiusList = c(3,6),
                 finalRadiusList = c(0),
                 numberOfIterationsList= c(1000,10000),
+                vectorStandartDesviationList = c(0.1,seq(0.5, 3, 0.5)),
                 seed = 543)
 
 
