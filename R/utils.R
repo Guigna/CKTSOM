@@ -322,7 +322,7 @@ validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,how
     #originalDataTestLabels<- data.frame(data,labels)
     dataTest <- data[-idTrain,]
     resultadoEsoperado <- labels[-idTrain]
-    dataTest <- dataTest[,-length(dataTest)]
+  
 
     result <- calculateBmuDistance(neurons,dataTest ,numberOfChildrenperNode,treeHeight)
     outliers<-getOutliersMuSigma(result,mu,sigma,howManyStandardDeviations = standardDeviations)
