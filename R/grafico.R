@@ -224,3 +224,61 @@ clusterVisualizationOnePlot <- function(datos,neuronas,numberOfChildrenperNode,v
 }
 
 
+clusterVisualizationZone <- function(datos,model,x=1,y=2 , threshold = NA){
+  neuronas <- model$neurons
+  numberOfChildrenperNode <- model$numberOfChildrenperNode
+  max <-length(datos[1,])
+  data <- datos
+  if (x>0 && x <= max && y >0 && y <=max){
+    colum<- c(x,y)
+    datos<- datos[,colum]
+    neuronas<- neuronas[,colum]
+
+    name<- names(datos)
+
+
+
+    if(is.na(threshold)){
+      # mi pairs plot
+      p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
+        geom_point(colour = "red",size = 1) +
+        geom_point(data = model$getBMUs(),shape = 21,colour = "red", size = 5, stroke = 1)+
+        #  geom_point(data = neuronas,shape = 21,shape = 21,colour = "black", fill = "white", size = 5, stroke = 5)
+        geom_point(data = neuronas,size = 1.5,shape = 19)
+
+      color <- 0
+      sumaParcial<-0
+      ##marca las lineas, agregandole el color por nivel
+      for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
+        if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
+          sumaParcial<- sumaParcial +numberOfChildrenperNode^color
+          color <- color +1
+        }
+        p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),],colour = color+1)
+      }
+    } else {
+      # mi pairs plot
+      vectorClusterData <- model$prediction(data,threshold)
+      p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
+        geom_point(colour = vectorClusterData,size = 1) +
+
+
+
+
+        #geom_point(data = model$getBMUs(),shape = 21,colour = "red", size = 5, stroke = 1) +
+        geom_point(data = neuronas,colour="red" ,size = 1.5,shape = 19)
+
+      ##marca las lineas, agregandole el color por nivel
+      for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
+        p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),])
+      }
+    }
+    p
+  } else {
+    x<- paste("x range 1-",max,sep="")
+    y<- paste("y range 1-",max,sep="")
+    print(x)
+    print(y)
+  }
+}
+
