@@ -61,8 +61,8 @@ trainSOM <- function(numberColumn, numberRow, initialLearningRate, finalLearning
 #' @return numeric vector con el BMU de cada dato
 calculateBMUForData <- function(data,neurons,clusterVector,numberOfChildrenperNode,treeHeight) {
   dataBMU<- rep(0,length(data[,1]))
-  ini<-(length(neurons[,1])-(numberOfChildrenperNode**treeHeight)+1)
-  fin<-length(neurons[,1])
+  ini<-(length(neurons[,1])-(numberOfChildrenperNode**treeHeight)+1)  ## primera neurona BMU
+  fin<-length(neurons[,1])                    ## ultima neurona BMU
   for (i in c(1:length(dataBMU))) {
     dataBMU[i]<-findBMU(neurons[c(ini:fin),],data[i,])
   }
@@ -80,7 +80,7 @@ calculateBMUForData <- function(data,neurons,clusterVector,numberOfChildrenperNo
 #'
 #' @return float que contiene la distancia calculada
 calculateDistance <- function(point1, point2){
-  return (calculateEuclideanDistance (point1[1,],point2[1,] ))
+  return (calculateEuclideanDistance (point1[1,],point2[1,] ))#calcula distancia usando c++
 }
 
 #' setSeed calcula define la semilla
@@ -134,7 +134,7 @@ calculateGroups <- function(numberOfGroups,numberOfChildrenperNode,treeHeight){
   return(groups)
 }
 
-#' marcarHijos registra el grupo del nodo
+#' marcarHijos registra el grupo del nodo, utilizado para gaficar
 #'
 #' @param node A data frame
 #' @param numberOfChildrenperNode A integer
@@ -168,37 +168,15 @@ calculateNumberOfNeurons<- function( numberOfChildrenperNode, treeHeight){
   return(sum)
 }
 
-#' getOutliers calcula los outla
+
+#' calculateBmuDistance calcula el BMU y la distancia a esta de instancia del conjunto de datos
 #'
 #' @param neurons A data frame
 #' @param data A data frame
 #' @param numberOfChildrenperNode A integer
 #' @param treeHeight A integer
-#' @param howManyStandardDeviations A integer [1:3]
 #'
 #' @return
-getOutliers <- function(neurons,data ,numberOfChildrenperNode,treeHeight,howManyStandardDeviations = 1){
-  clusterVector<- c(1:length(neurons[,1]))
-  ## calculate the bmu and euclidian distance for each data
-  result <-matrix(ncol = 2,nrow = length(data[,1]))  #create matrix to start BMU and euclidean distance
-  for (i in 1:length(data[,1])) {
-    stimulus <- data[i,]
-    result[i,]<-calculateBMUandDistance(neurons,stimulus, numberOfChildrenperNode, treeHeight)
-  }
-  ## calculate mu and sigma
-  mu <- mean(result[,2])
-  sigma <- sd(result[,2])
-
-  #generate  Z-Score
-  #|(d - (mu) )|  / (sigma)
-  Zscore <- vector(length = length(result[,1]))  #create vector withc lenght equals to the number of stimuli
-  Zscore<- (abs(result[,2] - mu))/sigma
-  ##get outliers
-  #z-score < [12,3]
-  outliers <- c(1:length(data[,1]))
-  outliers <- outliers[Zscore > howManyStandardDeviations]
-  return(outliers)
-}
 
 calculateBmuDistance <- function(neurons,data ,numberOfChildrenperNode,treeHeight){
   clusterVector<- c(1:length(neurons[,1]))
@@ -212,6 +190,16 @@ calculateBmuDistance <- function(neurons,data ,numberOfChildrenperNode,treeHeigh
   return(result)
 }
 
+
+#' getOutliers calcula los outiers
+#'
+#' @param neurons A data frame
+#' @param data A data frame
+#' @param numberOfChildrenperNode A integer
+#' @param treeHeight A integer
+#' @param howManyStandardDeviations A integer [1:3]
+#'
+#' @return
 getOutliersMuSigma <- function(result,mu,sigma,howManyStandardDeviations = 1){
 
   #generate  Z-Score
@@ -272,7 +260,7 @@ getDefaultTraingSettings<-function(numberOfChildrenperNode = 3,treeHeight =3,
   return(trainSeting)
 }
 
-validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,howManyAuc = 5){
+validate<-function(data,labels,validation_size,standardDeviationsList,trainSettings,howManyAuc = 5){
   repMax <- 10*howManyAuc
   repAct<-1
   aucFinal <- rep(NA,howManyAuc)
@@ -290,31 +278,20 @@ validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,how
 
   while (i<=howManyAuc) {
 
-    ##train
-    #dataTraining<- data.frame(data,labels)
+    ## separar datos en entrenamiento y test
+    data.target <- data[labels ==1,]
+
+    idTarget<-sample( 1:nrow( data.target ), validation_size )## obteniendo al azar validatio_size elementos objetivo
+    data.target <- data.target[idTarget,] # obteniendo el subconjunto de dato de entrenamineto, compuesto exclusivamente de datos objetivo
+    idTrain <- as.numeric(row.names(data.target))  # id de datos de entreneamiento con respecto a dataset original
 
 
-    #estratos <- strata( dataTraining, stratanames = c("labels"), size = strataConfig, method = "srswor" )
-    #dataTraining <- getdata( dataTraining, estratos )
-    dataTraining <- data[labels ==1,]
-
-    idTrain<-sample( 1:nrow( dataTraining ), strataConfig )
-
-    dataTraining <- dataTraining[idTrain,]
-    idTrain <- as.numeric(row.names(dataTraining))
-    #dataTraining <- dataTraining[dataTraining$labels ==1,]
-
-
-    #trainingFolk <- dataTraining[,columns]
-    #dataTraining <- dataTraining[,-length(dataTraining)]
-
-
-    #######train listo               training
+    #######           training
 
     # Training with dataTraining
-    neurons <- train(numberOfChildrenperNode,treeHeight,initialLearningRate,finalLearningRate,initialRadius,finalRadius,numberOfIterations, dataTraining)
+    neurons <- train(numberOfChildrenperNode,treeHeight,initialLearningRate,finalLearningRate,initialRadius,finalRadius,numberOfIterations, data.target)
     # Calculus of mu and sigma
-    result <- calculateBmuDistance(neurons,dataTraining ,numberOfChildrenperNode,treeHeight)
+    result <- calculateBmuDistance(neurons,data.target ,numberOfChildrenperNode,treeHeight)
     mu <- mean(result[,2])
     sigma <- sd(result[,2])
 
@@ -326,7 +303,7 @@ validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,how
 
 
     result <- calculateBmuDistance(neurons,dataTest ,numberOfChildrenperNode,treeHeight)
-    outliers<-getOutliersMuSigma(result,mu,sigma,howManyStandardDeviations = standardDeviations)
+    outliers<-getOutliersMuSigma(result,mu,sigma,howManyStandardDeviations = standardDeviationsList)
 
 
 
@@ -353,17 +330,25 @@ validate<-function(data,labels,strataConfig,standardDeviations,trainSettings,how
 }
 
 
-
-
-calculateStrata<- function(label,percentage){
-  label <- label -1
-  return (round( sum(label) * percentage))
+validationSize <- function(data,percentage){
+  return(round(dim(data)[1]*percentage))
 }
 
+#' normalize Normaliza una lista entre  0 y 1
+#'
+#' @param x A list
+#'
+#' @return lista normalizada
 normalize <- function(x) {
   return ((x - min(x)) / (max(x) - min(x)))
 }
 
+
+#' normalizeDataFRame Normaliza los datos entre  0 y 1
+#'
+#' @param data A data frame
+#'
+#' @return data frame normalizado
 normalizeDataFRame<- function(data) {
   dim <- length(data[1,])
   for (i in c(1:dim)){
@@ -397,18 +382,18 @@ oneRMSE<- function(data,trainSettings){
 
 
 #####################
-calculateRMSE <- function(data,trainSettings,log = c(1:3),seed = 543){
-  iteraciones <- c(1:length(log))
-  RMSEout <- c(1:length(log))
-  for ( i in iteraciones){
+calculateRMSE <- function(data,trainSettings,numberOfIterationsList= c(1000,10000),seed = 543){
+  n <- 1
+  RMSEout <- c(1:length(numberOfIterationsList))
+  for ( numberOfIterations in numberOfIterationsList){
     setSeed(seed)
-    trainSettings[7] <-log[i]
-    RMSEout[i]<- oneRMSE(data,trainSettings)    # Calcula el RMSE
-    iteraciones[i] <- log[i]
+    trainSettings[7] <-numberOfIterations
+    RMSEout[n]<- oneRMSE(data,trainSettings)    # Calcula el RMSE
+    n <- n+1
     #print(i)
   }
 
-  return(data.frame(RMSEout,iteraciones))
+  return(data.frame(RMSEout,numberOfIterationsList))
   #RMSE  #muestra en pantalla los valores de RMSE
   #iteraciones  #muestra en pantalla las iteraciones para los RMSE mostrados
 }
@@ -436,13 +421,14 @@ calculateAUC<- function(data,labels,
   print(totalPruebas)
 
 
-  strata <- calculateStrata(labels,0.5)
 
+  validation_size <- validationSize(data[labels == 2,],0.5) # entrega la cantidad de datos utilizados para el entrenamiento [0,1]
   howManyAuc <- 20 # cuantas veces se hace el experimento
   vectorStandartDesviation <- vectorStandartDesviationList  ## se genera una secuencia de distinos valores para el z-score   (0.1 0.5 1.0 1.5 2.0 2.5 3.0)
-
   resultados <-matrix(ncol = 10,nrow = totalPruebas)
   #iterar
+
+
   nn<-1
   ##########
   for (numberOfchildren in numberOfChildrenperNodeList) {
@@ -460,7 +446,7 @@ calculateAUC<- function(data,labels,
                 n<- 1
                 for (standardDeviations in vectorStandartDesviation) {
                   setSeed(seed)
-                  aucCalculate <- validate(data,labels,strata,standardDeviations,trainSettings,howManyAuc) ## una ejecucion
+                  aucCalculate <- validate(data,labels,validation_size,standardDeviations,trainSettings,howManyAuc) ## una ejecucion
 
                   out[n,] <- aucCalculate
                   n<- n+1
@@ -497,6 +483,12 @@ calculateAUC<- function(data,labels,
 }
 
 ####models
+
+
+
+
+
+
 
 cktsom <- setRefClass("cktsom",
                       fields = list(neurons = "data.frame",mean= "numeric",sigma = "numeric",

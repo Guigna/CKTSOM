@@ -88,6 +88,21 @@ int findBmuSom(NumericVector stimulusVector,NumericMatrix neurons){
   return it - range.begin();
 }
 
+
+//desordena el set de datos
+NumericMatrix disorder(NumericMatrix data){
+  int random1,random2;
+  for(int i = 0; i < data(_,0).size()*2/3;i++){
+    random1 = rand() % data(_,0).size();
+    NumericVector dataTemp = data(random1,_);
+    random2 = rand() % data(_,0).size();
+    data(random1,_)=data(random2,_);
+    data(random2,_)=dataTemp;
+  }
+  return data;
+}
+
+
 // [[Rcpp::export]]
 Rcpp::DataFrame trainSOM_Rcpp(int numberColumn,int numberRow,float initialLearningRate ,float finalLearningRate,
                               int initialRadius,int  finalRadius, int iterations

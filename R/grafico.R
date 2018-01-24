@@ -224,6 +224,14 @@ clusterVisualizationOnePlot <- function(datos,neuronas,numberOfChildrenperNode,v
 }
 
 
+circleFun <- function(center = c(0,0),r = 1, npoints = 100){
+  tt <- seq(0,2*pi,length.out = npoints)
+  xx <- center[1] + r * cos(tt)
+  yy <- center[2] + r * sin(tt)
+  return(data.frame(X1 = xx, X2 = yy))
+}
+
+
 clusterVisualizationZone <- function(datos,model,x=1,y=2 , threshold = NA){
   neuronas <- model$neurons
   numberOfChildrenperNode <- model$numberOfChildrenperNode
@@ -248,7 +256,7 @@ clusterVisualizationZone <- function(datos,model,x=1,y=2 , threshold = NA){
 
       color <- 0
       sumaParcial<-0
-      ##marca las lineas, agregandole el color por nivel
+      ##marca las lineas
       for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
         if (sumaParcial + numberOfChildrenperNode^color< i & colorEdge) {
           sumaParcial<- sumaParcial +numberOfChildrenperNode^color
@@ -256,19 +264,28 @@ clusterVisualizationZone <- function(datos,model,x=1,y=2 , threshold = NA){
         }
         p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),],colour = color+1)
       }
+
+
+
+
     } else {
       # mi pairs plot
       vectorClusterData <- model$prediction(data,threshold)
+      radio <- threshold * model$sigma + model$mean
       p <-ggplot(datos, aes_string(x = name[1], y = name[2])) +
-        geom_point(colour = vectorClusterData,size = 1) +
+        geom_point(colour = vectorClusterData,size = 1) +    ##pinta los datos, usando colores rojo objetivo y negro outlier
+        geom_point(data = neuronas,colour="red" ,size = 1.5,shape = 19)  ##pinta las neuronas
 
+        BMUS <- model$getBMUs()
 
+      ## circulos a los BMU
+      for(i in 1:dim(BMUS)[1]){
+        circulo <- circleFun(center =  c(BMUS[i,x],BMUS[i,y]),r = radio)
+        names(circulo) <- name
+        p<- p + geom_path(data = circulo)
+      }
 
-
-        #geom_point(data = model$getBMUs(),shape = 21,colour = "red", size = 5, stroke = 1) +
-        geom_point(data = neuronas,colour="red" ,size = 1.5,shape = 19)
-
-      ##marca las lineas, agregandole el color por nivel
+      ##marca las lineas
       for (i in 1:buscaPadre(length(neuronas[,1]),numberOfChildrenperNode)) {
         p <- p + geom_path(data = neuronas[miniLista(i,numberOfChildrenperNode),])
       }

@@ -1,3 +1,12 @@
+require(sampling)
+library(ggplot2)
+#install.packages("R.matlab")
+library(R.matlab)
+library(CKTSOM)
+library(dplyr)
+require("ROCR")
+library(beepr)
+
 #############################################################
 ################        AUC exaple          #################
 #############################################################
@@ -11,12 +20,12 @@ library(dplyr)
 
 ## get data of
 #  http://homepage.tudelft.nl/n9d04/occ/
-data <- readMat("http://homepage.tudelft.nl/n9d04/occ/501/oc_501.mat")
+dataMat <- readMat("http://homepage.tudelft.nl/n9d04/occ/501/oc_501.mat")
 
 ## set parameters
-dataT <-data.frame(data$x$data)
-labels <- data$x$nlab
-strata <- calculateStrata(labels,0.9)
+data <-data.frame(dataMat$x$data)
+labels <- dataMat$x$nlab
+strata <- validationSize(data[labels == 2,],0.5) # entrega la cantidad de datos utilizados para el entrenamiento [0,1]
 trainSettings <- getDefaultTraingSettings()
 howManyAuc <- 5
 
@@ -25,7 +34,7 @@ vectorStandartDesviation <- seq(0.1, 3, 0.1)
 out <- matrix(NA, nrow=length(vectorStandartDesviation), ncol=howManyAuc)
 n<- 1
 for (standardDeviations in vectorStandartDesviation) {
-  aucCalculate <- validate5x10cv(dataT,labels,strata,standardDeviations,trainSettings,howManyAuc)
+  aucCalculate <- validate(data,labels,strata,standardDeviations,trainSettings,howManyAuc)
   out[n,] <- aucCalculate
   n<- n+1
 }

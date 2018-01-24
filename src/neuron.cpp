@@ -4,6 +4,9 @@
 #include <time.h>
 #include <math.h>
 
+#include <algorithm>
+
+
 using namespace Rcpp;
 
 
@@ -66,6 +69,7 @@ NumericMatrix updateTree(NumericMatrix neurons, const NumericVector stimulus,
   return neurons;
 }
 
+
 //calcula la distancia eucludiana al cuadrado entre 2 puntos   (neuron, stimulus)
 double calculateEuclideanDistance2PointSquare (const NumericVector point1,const NumericVector point2 ){
   LogicalVector mask = is_na(point2);
@@ -112,19 +116,27 @@ int findBMU_tree(const NumericVector stimulus,const NumericMatrix neurons,const 
 }
 
 
+//random uniforme
+inline int randWrapper(const int n) { return floor(unif_rand()*n); }
 
-//desordena el set de datos
-NumericMatrix disorder(NumericMatrix data){
-  int random1,random2;
-  for(int i = 0; i < data(_,0).size()*2/3;i++){
-    random1 = rand() % data(_,0).size();
-    NumericVector dataTemp = data(random1,_);
-    random2 = rand() % data(_,0).size();
-    data(random1,_)=data(random2,_);
-    data(random2,_)=dataTemp;
-  }
-  return data;
+// desordena un vector
+Rcpp::NumericVector randomShuffle(Rcpp::NumericVector a) {
+  std::random_shuffle(a.begin(), a.end(), randWrapper);
+  return a;
 }
+
+
+// genera un vector creciente de 0 a size lo desordena al retornar
+NumericVector generatevector(int size){
+  NumericVector index(size);
+  for (int i=0; i<size; i++) { index[i] = i; };
+  index = randomShuffle(index);
+
+  return index;
+}
+
+
+
 
 // [[Rcpp::export]]
 Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float initialLearningRate ,float finalLearningRate,
@@ -173,11 +185,11 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
   long double radiusStep = (initialRadius - finalRadius) / iterations;
 
 
-  //desordena los datos
-  data = disorder(data);
   //inicializa la epoca
   int index = 0;
   int dataLength = data(_,0).size();
+
+  NumericVector vectorIndex = generatevector(dataLength);
 
   ///////////////////////////////
   ///////////////////////////////START TRAINING
@@ -186,15 +198,14 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
   for(unsigned long i = 0 ; i <iterations ; i++){
     //inicia nueva epoca
     if (index == dataLength){
-      data = disorder(data);
+      vectorIndex = randomShuffle(vectorIndex);
       index = 0;
     }
 
     //busca el BMU
-    int bestNeuron = findBMU_tree( data(index,_), neurons,numberOfChildrenperNode, treeHeight);
+    int bestNeuron = findBMU_tree( data(vectorIndex(index),_), neurons,numberOfChildrenperNode, treeHeight);
     //actualiza la red neuronal
-    //neurons = updateStructure( neurons,  data(index,_),round(radius),  learningRate, bestNeuron, numberOfChildrenperNode);
-    neurons = updateTree( neurons,  data(index,_),round(radius),  learningRate, bestNeuron, numberOfChildrenperNode);
+    neurons = updateTree( neurons,  data(vectorIndex(index),_),round(radius),  learningRate, bestNeuron, numberOfChildrenperNode);
     radius -= radiusStep;
     learningRate -= learningRateStep;
     index+=1;
@@ -243,4 +254,8 @@ Rcpp::DataFrame train_Rcpp(int numberOfChildrenperNode,int treeHeight,float init
 void set_seed(int seed){
   srand(seed);
 }
+
+
+
+
 

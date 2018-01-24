@@ -15,7 +15,7 @@ trainSettings <- getDefaultTraingSettings(numberOfChildrenperNode = 3,treeHeight
                                         initialLearningRate =1 ,finalLearningRate = 0.0,
                                         initialRadius = 3,finalRadius = 0)
 
-calculateRMSE(data,trainSettings,log= c(10,20,30,50),seed = 543)
+calculateRMSE(data,trainSettings,numberOfIterationsList= c(10,20,30,50),seed = 543)
 
 
 
